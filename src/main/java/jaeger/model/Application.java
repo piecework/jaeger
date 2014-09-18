@@ -15,7 +15,7 @@
  */
 package jaeger.model;
 
-import piecework.authorization.AccessAuthority;
+import jaeger.security.AccessAuthority;
 
 /**
  * @author James Renfro

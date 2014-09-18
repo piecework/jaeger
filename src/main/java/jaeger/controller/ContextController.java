@@ -15,8 +15,17 @@
  */
 package jaeger.controller;
 
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 /**
  * @author James Renfro
  */
+@RestController
+@RequestMapping("v1/context")
 public class ContextController {
+
+    // TODO: This class should define ways for the end users to create "contexts" -- individual definitions
+    // TODO: for how data can be submitted to the service as a document
+
 }

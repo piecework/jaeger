@@ -17,10 +17,10 @@ package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jaeger.enumeration.FieldTag;
+import jaeger.security.Sanitizer;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.annotation.Id;
-import piecework.common.ViewContext;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -115,20 +115,17 @@ public class Field implements Serializable, Comparable<Field> {
     @XmlAttribute
     private final int ordinal;
 
-    @XmlAttribute
-    private final String link;
-
     @XmlTransient
     @JsonIgnore
     private final boolean isDeleted;
 
     private final boolean replace;
 
-    private Field() {
-        this(new Field.Builder(), new ViewContext());
+    public Field() {
+        this(new Field.Builder());
     }
 
-    private Field(Field.Builder builder, ViewContext context) {
+    private Field(Field.Builder builder) {
         this.fieldId = builder.fieldId;
         this.label = builder.label;
         this.header = builder.header;
@@ -154,7 +151,6 @@ public class Field implements Serializable, Comparable<Field> {
         this.isDeleted = builder.isDeleted;
         this.constraints = builder.constraints != null ? Collections.unmodifiableList(builder.constraints) : null;
         this.options = builder.options != null ? Collections.unmodifiableList(builder.options) : null;
-        this.link = context != null && StringUtils.isNotEmpty(builder.processInstanceId) ? context.getSsoUrl(ProcessInstance.Constants.ROOT_ELEMENT_NAME, builder.processDefinitionKey, builder.processInstanceId, "value", builder.name) : null;
         this.metadataTemplates = builder.metadataTemplates != null ? Collections.unmodifiableMap(builder.metadataTemplates) : null;
         this.replace = builder.replace;
     }
@@ -264,10 +260,6 @@ public class Field implements Serializable, Comparable<Field> {
 		return constraints;
 	}
 
-	public String getLink() {
-		return link;
-	}
-
 	public boolean isDeleted() {
 		return isDeleted;
 	}
@@ -371,7 +363,7 @@ public class Field implements Serializable, Comparable<Field> {
             this.mask = field.mask;
             this.pattern = field.pattern;
             this.customValidity = field.customValidity;
-            if (this.type != null && this.type.equals(piecework.Constants.FieldTypes.HTML))
+            if (this.type != null && this.type.equals(FieldTag.HTML.getFieldType()))
                 this.defaultValue = field.defaultValue;
             else
                 this.defaultValue = sanitizer.sanitize(field.defaultValue);
@@ -409,11 +401,7 @@ public class Field implements Serializable, Comparable<Field> {
         }
 
         public Field build() {
-            return new Field(this, null);
-        }
-
-        public Field build(ViewContext context) {
-            return new Field(this, context);
+            return new Field(this);
         }
 
         public Builder fieldId(String fieldId) {

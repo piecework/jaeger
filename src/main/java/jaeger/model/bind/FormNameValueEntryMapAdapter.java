@@ -15,8 +15,8 @@
  */
 package jaeger.model.bind;
 
+import jaeger.model.ManyMap;
 import jaeger.model.Value;
-import piecework.common.ManyMap;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.ArrayList;

@@ -15,7 +15,8 @@
  */
 package jaeger.exception;
 
-import piecework.validation.ValidationRule;
+
+import jaeger.validation.ValidationRule;
 
 /**
  * @author James Renfro

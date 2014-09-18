@@ -15,8 +15,8 @@
  */
 package jaeger.security;
 
+import jaeger.model.Secret;
 import org.bouncycastle.crypto.InvalidCipherTextException;
-import piecework.model.Secret;
 
 import java.io.UnsupportedEncodingException;
 import java.security.GeneralSecurityException;

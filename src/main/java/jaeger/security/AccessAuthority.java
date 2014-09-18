@@ -16,9 +16,9 @@
 package jaeger.security;
 
 import com.google.common.collect.Sets;
+import jaeger.model.ManyMap;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
-import piecework.common.ManyMap;
 
 import java.util.*;
 
@@ -55,12 +55,12 @@ public class AccessAuthority implements GrantedAuthority {
         return Sets.intersection(groupIds, allowedGroupIds).size() >= 1;
     }
 
-    public boolean hasRole(piecework.model.Process process, Set<String> allowedRoleSet) {
+    public boolean hasRole(String namespace, Set<String> allowedRoleSet) {
         if (!resourceAuthorityMap.isEmpty()) {
             Set<ResourceAuthority> resourceAuthorities = matchedResourceAuthorities(allowedRoleSet);
             for (ResourceAuthority resourceAuthority : resourceAuthorities) {
                 if (allowedRoleSet == null || allowedRoleSet.contains(resourceAuthority.getRole())) {
-                    if (resourceAuthority.hasRole(process, allowedRoleSet))
+                    if (resourceAuthority.hasRole(namespace, allowedRoleSet))
                         return true;
                 }
             }
@@ -74,7 +74,7 @@ public class AccessAuthority implements GrantedAuthority {
             Set<ResourceAuthority> resourceAuthorities = matchedResourceAuthorities(allowedRoleSet);
             // Iterate through all of the matching resource authorities and add their process definition keys
             for (ResourceAuthority resourceAuthority : resourceAuthorities) {
-                Set<String> resourceAuthorityProcessDefinitionKeys = resourceAuthority.getProcessDefinitionKeys();
+                Set<String> resourceAuthorityProcessDefinitionKeys = resourceAuthority.getNamespaces();
                 if (resourceAuthorityProcessDefinitionKeys != null && !resourceAuthorityProcessDefinitionKeys.isEmpty())
                     processDefinitionKeys.addAll(resourceAuthorityProcessDefinitionKeys);
             }

@@ -30,7 +30,7 @@ import java.util.List;
 /**
  * @author James Renfro
  */
-@ConfigurationProperties(prefix = "consolidate.mongo")
+@ConfigurationProperties(prefix = "jaeger.mongo")
 public class MongoProperties {
 
     private String serverAddresses;

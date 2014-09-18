@@ -15,8 +15,13 @@
  */
 package jaeger.repository;
 
+import jaeger.model.Document;
+import jaeger.repository.custom.DocumentRepositoryCustom;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
 /**
  * @author James Renfro
  */
-public class DocumentRepository {
+public interface DocumentRepository extends MongoRepository<Document, String>, DocumentRepositoryCustom {
+
 }

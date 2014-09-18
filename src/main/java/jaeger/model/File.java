@@ -18,12 +18,9 @@ package jaeger.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonValue;
+import jaeger.security.Sanitizer;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.annotation.Transient;
-import piecework.common.ViewContext;
-import piecework.content.ContentResource;
-import piecework.content.Version;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
@@ -54,12 +51,6 @@ public class File extends Value {
     private final String location;
 
     @XmlAttribute
-    private final String link;
-
-    @XmlAttribute
-    private final String uri;
-
-    @XmlAttribute
     private final String filerId;
 
     @XmlElementWrapper(name = "versions")
@@ -72,18 +63,16 @@ public class File extends Value {
     private transient final ContentResource contentResource;
 
 
-    private File() {
-        this(new Builder(), null);
+    public File() {
+        this(new Builder());
     }
 
-    private File(Builder builder, ViewContext context) {
+    private File(Builder builder) {
         this.id = builder.id;
         this.contentType = builder.contentType;
         this.location = builder.location;
         this.name = builder.name;
         this.description = builder.description;
-        this.link = builder.link == null && context != null && StringUtils.isNotEmpty(builder.processInstanceId) ? context.getSsoUrl(ProcessInstance.Constants.ROOT_ELEMENT_NAME, builder.processDefinitionKey, builder.processInstanceId, "value", builder.fieldName, builder.id) : builder.link;
-        this.uri = context != null && StringUtils.isNotEmpty(builder.processInstanceId) ? context.getApiUrl(ProcessInstance.Constants.ROOT_ELEMENT_NAME, builder.processDefinitionKey, builder.processInstanceId, "value", builder.fieldName, builder.id) : builder.link;
         this.contentResource = builder.contentResource;
         this.filerId = builder.filerId;
         this.versions = builder.versions != null && !builder.versions.isEmpty() ? new ArrayList<Version>(builder.versions) : new ArrayList<Version>();
@@ -114,14 +103,6 @@ public class File extends Value {
     @JsonIgnore
     public ContentResource getContentResource() {
         return contentResource;
-    }
-
-    public String getLink() {
-        return link;
-    }
-
-    public String getUri() {
-        return uri;
     }
 
     public String getFilerId() {
@@ -190,11 +171,7 @@ public class File extends Value {
         }
 
         public File build() {
-            return new File(this, null);
-        }
-
-        public File build(ViewContext context) {
-            return new File(this, context);
+            return new File(this);
         }
 
         public Builder id(String id) {

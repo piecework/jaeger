@@ -15,12 +15,11 @@
  */
 package jaeger.test;
 
-import piecework.Constants;
-import piecework.content.ContentResource;
-import piecework.content.concrete.BasicContentResource;
-import piecework.enumeration.ActionType;
-import piecework.model.*;
-import piecework.model.Process;
+import jaeger.Constants;
+import jaeger.enumeration.FieldTag;
+import jaeger.model.Constraint;
+import jaeger.model.Field;
+import jaeger.model.Option;
 
 import java.io.ByteArrayInputStream;
 import java.util.UUID;
@@ -33,7 +32,7 @@ public class ExampleFactory {
     public static Field employeeNameField() {
         return new Field.Builder()
                 .fieldId("000100")
-                .type(Constants.FieldTypes.TEXT)
+                .type(FieldTag.TEXT.getFieldType())
                 .label("Employee")
                 .name("employeeName")
                 .maxValueLength(40)
@@ -45,7 +44,7 @@ public class ExampleFactory {
     public static Field budgetNumberField() {
         return new Field.Builder()
                 .fieldId("000101")
-                .type(Constants.FieldTypes.NUMBER)
+                .type(FieldTag.NUMBER.getFieldType())
                 .label("Budget number")
                 .name("budgetNumber")
                 .defaultValue("100000")
@@ -59,12 +58,11 @@ public class ExampleFactory {
     public static Field supervisorIdField() {
         return new Field.Builder()
                 .fieldId("000102")
-                .type(Constants.FieldTypes.TEXT)
+                .type(FieldTag.TEXT.getFieldType())
                 .label("Manager id")
                 .name("supervisorId")
                 .pattern("[a-z]{3}[0-9]{2}")
                 .customValidity("Must be three lower-case letters, followed by two digits")
-//                .constraint(new Constraint.Builder().constraintId("c2").type(Constants.ConstraintTypes.IS_VALID_USER).build())
                 .constraint(new Constraint.Builder()
                         .constraintId("c3")
                         .type(Constants.ConstraintTypes.IS_ONLY_REQUIRED_WHEN)
@@ -92,7 +90,7 @@ public class ExampleFactory {
     public static Field actionTypeField() {
         return new Field.Builder()
                 .fieldId("000103")
-                .type(Constants.FieldTypes.SELECT_MULTIPLE)
+                .type(FieldTag.SELECT_MULTIPLE.getFieldType())
                 .label("Action to take")
                 .name("action")
                 .option(new Option.Builder().optionId("o1").label("Grant bonus").value("bonus").build())
@@ -108,7 +106,7 @@ public class ExampleFactory {
     public static Field locationField() {
         return new Field.Builder()
                 .fieldId("000104")
-                .type(Constants.FieldTypes.SELECT_ONE)
+                .type(FieldTag.SELECT_ONE.getFieldType())
                 .label("Location")
                 .name("location")
                 .option(new Option.Builder().optionId("o5").label("In-state").value("in state").build())
@@ -122,7 +120,7 @@ public class ExampleFactory {
     public static Field descriptionField() {
         return new Field.Builder()
                 .fieldId("000105")
-                .type(Constants.FieldTypes.TEXTAREA)
+                .type(FieldTag.TEXTAREA.getFieldType())
                 .label("Description")
                 .name("Description")
                 .maxValueLength(4000)
@@ -132,7 +130,7 @@ public class ExampleFactory {
     public static Field confirmationField() {
         return new Field.Builder()
                 .fieldId("000106")
-                .type(Constants.FieldTypes.TEXT)
+                .type(FieldTag.TEXT.getFieldType())
                 .name("ConfirmationNumber")
                 .constraint(new Constraint.Builder().constraintId("c6").type(Constants.ConstraintTypes.IS_CONFIRMATION_NUMBER).build())
                 .maxValueLength(40)
@@ -142,7 +140,7 @@ public class ExampleFactory {
     public static Field allowedField() {
         return new Field.Builder()
                 .fieldId("000107")
-                .type(Constants.FieldTypes.CHECKBOX)
+                .type(FieldTag.CHECKBOX.getFieldType())
                 .label("Is this employee allowed to go on vacation?")
                 .name("Allowed")
                 .option(new Option.Builder().optionId("o8").value("Yes").label("Yes").build())
@@ -153,37 +151,12 @@ public class ExampleFactory {
     public static Field applicableField() {
         return new Field.Builder()
                 .fieldId("000108")
-                .type(Constants.FieldTypes.RADIO)
+                .type(FieldTag.RADIO.getFieldType())
                 .label("Is this form applicable to them?")
                 .name("Applicable")
                 .option(new Option.Builder().optionId("o9").value("Yes").label("Yes").build())
                 .option(new Option.Builder().optionId("o10").value("No").label("No").build())
                 .editable()
-                .build();
-    }
-
-    public static ProcessDeployment exampleProcessDeployment() {
-        return new ProcessDeployment.Builder()
-                .engine("activiti")
-                .engineProcessDefinitionKey("example")
-                .build();
-    }
-
-    public static Process exampleProcess() {
-        ProcessDeployment deployment = exampleProcessDeployment();
-        return new Process.Builder()
-                .processDefinitionKey("Demonstration")
-                .processDefinitionLabel("This is a demonstration process")
-                .deploy(new ProcessDeploymentVersion(deployment), deployment)
-                .build();
-    }
-
-    public static ProcessInstance exampleProcessInstance() {
-        Process process = exampleProcess();
-        return new ProcessInstance.Builder()
-                .processDefinitionKey(process.getProcessDefinitionKey())
-                .processDefinitionLabel(process.getProcessDefinitionLabel())
-                .engineProcessInstanceId(UUID.randomUUID().toString())
                 .build();
     }
 

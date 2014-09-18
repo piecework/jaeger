@@ -16,8 +16,8 @@
 package jaeger.content;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import piecework.enumeration.Scheme;
-import piecework.security.Sanitizer;
+import jaeger.enumeration.Scheme;
+import jaeger.security.Sanitizer;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -45,7 +45,7 @@ public class ContentProfile {
     private final Scheme defaultScheme;
     private final Map<String, String> contentMetadata;
 
-    private ContentProfile() {
+    public ContentProfile() {
         this(new Builder());
     }
 

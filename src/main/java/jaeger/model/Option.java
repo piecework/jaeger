@@ -16,9 +16,8 @@
 package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jaeger.security.Sanitizer;
 import org.springframework.data.annotation.Id;
-import piecework.common.ViewContext;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -52,11 +51,11 @@ public class Option implements Serializable {
     @XmlAttribute
     private final boolean selected;
 	
-	private Option() {
-        this(new Option.Builder(), new ViewContext());
+	public Option() {
+        this(new Option.Builder());
     }
 
-    private Option(Option.Builder builder, ViewContext context) {
+    private Option(Option.Builder builder) {
         this.optionId = builder.optionId;
         this.name = builder.name;
         this.value = builder.value;
@@ -106,13 +105,9 @@ public class Option implements Serializable {
         }
         
         public Option build() {
-            return new Option(this, null);
+            return new Option(this);
         }
 
-        public Option build(ViewContext context) {
-            return new Option(this, context);
-        }
-        
         public Builder optionId(String optionId) {
             this.optionId = optionId;
             return this;

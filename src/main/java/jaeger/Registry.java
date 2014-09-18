@@ -18,7 +18,6 @@ package jaeger;
 import org.apache.commons.collections.map.MultiKeyMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import piecework.Registrant;
 
 import javax.annotation.PostConstruct;
 import java.util.List;

@@ -15,7 +15,8 @@
  */
 package jaeger.security.concrete;
 
-import piecework.security.Sanitizer;
+
+import jaeger.security.Sanitizer;
 
 /**
  * This class is used in cases where the data has already been sanitized

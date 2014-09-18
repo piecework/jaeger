@@ -17,11 +17,10 @@ package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jaeger.security.Sanitizer;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
-import piecework.common.ViewContext;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -34,7 +33,6 @@ import java.util.Date;
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(name = Attachment.Constants.TYPE_NAME)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Document(collection = Attachment.Constants.ROOT_ELEMENT_NAME)
 public class Attachment implements Serializable, Comparable<Attachment> {
 
 	private static final long serialVersionUID = 3332973881472650839L;
@@ -71,12 +69,6 @@ public class Attachment implements Serializable, Comparable<Attachment> {
 	@XmlElement
 	private final Date lastModified;
 
-    @XmlAttribute
-    private final String link;
-
-	@XmlAttribute
-    private final String uri;
-
     @XmlTransient
     @JsonIgnore
     private final boolean isFieldAttachment;
@@ -85,11 +77,11 @@ public class Attachment implements Serializable, Comparable<Attachment> {
     @JsonIgnore
     private final boolean isDeleted;
 
-	private Attachment() {
-        this(new Attachment.Builder(), new ViewContext());
+	public Attachment() {
+        this(new Attachment.Builder());
     }
 
-    private Attachment(Attachment.Builder builder, ViewContext context) {
+    private Attachment(Attachment.Builder builder) {
         this.attachmentId = builder.attachmentId;
         this.name = builder.name;
         this.description = builder.description;
@@ -101,8 +93,6 @@ public class Attachment implements Serializable, Comparable<Attachment> {
         this.lastModified = builder.lastModified;
         this.isFieldAttachment = builder.isFieldAttachment;
         this.isDeleted = builder.isDeleted;
-        this.link = context != null ? context.getSsoUrl(ProcessInstance.Constants.ROOT_ELEMENT_NAME, builder.processDefinitionKey, builder.processInstanceId, Constants.ROOT_ELEMENT_NAME, builder.attachmentId) : null;
-        this.uri = context != null ? context.getApiUrl(ProcessInstance.Constants.ROOT_ELEMENT_NAME, builder.processDefinitionKey, builder.processInstanceId, Constants.ROOT_ELEMENT_NAME, builder.attachmentId) : null;
     }
 	
 	public String getAttachmentId() {
@@ -140,14 +130,6 @@ public class Attachment implements Serializable, Comparable<Attachment> {
 
 	public Date getLastModified() {
 		return lastModified;
-	}
-
-    public String getLink() {
-        return link;
-    }
-
-    public String getUri() {
-		return uri;
 	}
 
     @JsonIgnore
@@ -241,11 +223,7 @@ public class Attachment implements Serializable, Comparable<Attachment> {
         }
 
         public Attachment build() {
-            return new Attachment(this, null);
-        }
-
-        public Attachment build(ViewContext context) {
-            return new Attachment(this, context);
+            return new Attachment(this);
         }
 
         public Builder attachmentId(String attachmentId) {

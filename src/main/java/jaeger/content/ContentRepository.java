@@ -1,9 +1,6 @@
 package jaeger.content;
 
-import piecework.content.ContentResource;
-import piecework.exception.PieceworkException;
-import piecework.persistence.ContentProfileProvider;
-import piecework.persistence.ProcessInstanceProvider;
+import jaeger.model.ContentResource;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,13 +17,13 @@ public interface ContentRepository {
      * provided, a ContentProvider to handle that scheme must also be included in the application
      * context or an exception will be thrown.
      */
-    ContentResource checkoutByLocation(ContentProfileProvider modelProvider, String location) throws PieceworkException, IOException;
+    ContentResource checkoutByLocation(ContentProfile profile, String location) throws IOException;
 
     /*
      * Retrieves all content associated with a specific process instance so it can be displayed to the
      * user
      */
-    List<ContentResource> findAll(ContentProfileProvider modelProvider) throws PieceworkException;
+    List<ContentResource> findAll(ContentProfile profile) throws IOException;
 
     /*
      * Retrieves content from a location. This location can include a prefix to indicate the
@@ -34,33 +31,33 @@ public interface ContentRepository {
      * provided, a ContentProvider to handle that scheme must also be included in the application
      * context or an exception will be thrown.
      */
-    ContentResource findByLocation(ContentProfileProvider modelProvider, String location) throws PieceworkException;
+    ContentResource findByLocation(ContentProfile profile, String location) throws IOException;
 
     /*
      * Expires a piece of content so it is no longer available to be found
      */
-    boolean expireByLocation(ContentProfileProvider modelProvider, String location) throws PieceworkException, IOException;
+    boolean expireByLocation(ContentProfile profile, String location) throws IOException;
 
     /*
-     * Publishes all content for a process instance, e.g. when the process instance is complete
+     * Publishes all content for a document
      */
-    boolean publish(ProcessInstanceProvider instanceProvider) throws PieceworkException, IOException;
+    boolean publish(ContentProfile profile, String documentId) throws IOException;
 
     /*
      * Releases checked out content
      */
-    boolean releaseByLocation(ContentProfileProvider modelProvider, String location) throws PieceworkException, IOException;
+    boolean releaseByLocation(ContentProfile profile, String location) throws IOException;
 
     /*
      * Replaces an existing content resource, and assuming that the underlying provider is able to handle it, creates
      * a new version
      */
-    ContentResource replace(ContentProfileProvider modelProvider, ContentResource contentResource, String location) throws PieceworkException, IOException;
+    ContentResource replace(ContentProfile profile, ContentResource contentResource, String location) throws IOException;
 
     /*
      * Stores content specific to a process, or if the processDefinitionKey is left null,
      * in a general purpose location.
      */
-    ContentResource save(ContentProfileProvider modelProvider, ContentResource contentResource) throws PieceworkException, IOException;
+    ContentResource save(ContentProfile profile, ContentResource contentResource) throws IOException;
 
 }

@@ -15,12 +15,11 @@
  */
 package jaeger.validation;
 
+import jaeger.Constants;
+import jaeger.model.*;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import piecework.Constants;
-import piecework.common.ManyMap;
-import piecework.model.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -46,13 +45,11 @@ public class Validation implements Serializable {
 	
 	private final Set<String> unchangedFields;
 
-    private final Submission submission;
-
     private final String applicationStatusExplanation;
 
     private final boolean hasError;
 	
-	private Validation() {
+	public Validation() {
 		this(new Builder());
 	}
 	
@@ -63,7 +60,6 @@ public class Validation implements Serializable {
         this.data = builder.data;
         this.attachments = builder.attachments != null ? Collections.unmodifiableList(builder.attachments) : null;
 		this.unchangedFields = builder.unchangedFields != null ? Collections.unmodifiableSet(builder.unchangedFields) : null;
-	    this.submission = builder.submission;
         this.applicationStatusExplanation = builder.applicationStatusExplanation;
         this.hasError = builder.hasError;
     }
@@ -92,10 +88,6 @@ public class Validation implements Serializable {
 		return unchangedFields;
 	}
 
-    public Submission getSubmission() {
-        return submission;
-    }
-
     public String getApplicationStatusExplanation() {
         return applicationStatusExplanation;
     }
@@ -112,7 +104,6 @@ public class Validation implements Serializable {
         private ManyMap<String, Message> results;
         private List<Attachment> attachments;
         private Set<String> unchangedFields;
-        private Submission submission;
         private String applicationStatusExplanation;
         private boolean hasError;
 
@@ -132,7 +123,6 @@ public class Validation implements Serializable {
             this.applicationStatusExplanation = validation.getApplicationStatusExplanation();
             this.unchangedFields = validation.getUnchangedFields() != null ? new HashSet<String>(validation.getUnchangedFields()) : new HashSet<String>();
             this.hasError = validation.isHasError();
-            this.submission = validation.getSubmission();
         }
         
         public Validation build() {
@@ -227,11 +217,6 @@ public class Validation implements Serializable {
             if (attachments != null)
         	    this.attachments.addAll(attachments);
         	return this;
-        }
-
-        public Builder submission(Submission submission) {
-            this.submission = submission;
-            return this;
         }
 
         public Builder applicationStatusExplanation(String applicationStatusExplanation) {

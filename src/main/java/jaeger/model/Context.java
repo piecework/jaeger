@@ -15,8 +15,98 @@
  */
 package jaeger.model;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+
+import java.util.Set;
+
 /**
+ * A context determines who is able to read or write to a document, and which fields are
+ * viewable, editable, and required
+ *
  * @author James Renfro
  */
 public class Context {
+
+    @Indexed
+    private String namespace;
+
+    @Id
+    private String contextId;
+
+    private Set<Field> fields;
+
+    private Set<String> viewGroups;
+
+    private Set<String> editGroups;
+
+    private boolean allowAttachments;
+
+    private long maxAttachmentSize;
+
+    private boolean allowAny;
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getContextId() {
+        return contextId;
+    }
+
+    public void setContextId(String contextId) {
+        this.contextId = contextId;
+    }
+
+    public Set<Field> getFields() {
+        return fields;
+    }
+
+    public void setFields(Set<Field> fields) {
+        this.fields = fields;
+    }
+
+    public Set<String> getViewGroups() {
+        return viewGroups;
+    }
+
+    public void setViewGroups(Set<String> viewGroups) {
+        this.viewGroups = viewGroups;
+    }
+
+    public Set<String> getEditGroups() {
+        return editGroups;
+    }
+
+    public void setEditGroups(Set<String> editGroups) {
+        this.editGroups = editGroups;
+    }
+
+    public boolean isAllowAttachments() {
+        return allowAttachments;
+    }
+
+    public void setAllowAttachments(boolean allowAttachments) {
+        this.allowAttachments = allowAttachments;
+    }
+
+    public long getMaxAttachmentSize() {
+        return maxAttachmentSize;
+    }
+
+    public void setMaxAttachmentSize(long maxAttachmentSize) {
+        this.maxAttachmentSize = maxAttachmentSize;
+    }
+
+    public boolean isAllowAny() {
+        return allowAny;
+    }
+
+    public void setAllowAny(boolean allowAny) {
+        this.allowAny = allowAny;
+    }
 }

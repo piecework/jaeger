@@ -15,8 +15,13 @@
  */
 package jaeger.exception;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
 /**
  * @author James Renfro
  */
-public class UnauthorizedException {
+@ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+public class UnauthorizedException extends Exception {
+
 }

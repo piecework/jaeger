@@ -16,9 +16,8 @@
 package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jaeger.security.Sanitizer;
 import org.springframework.data.annotation.Id;
-import piecework.common.ViewContext;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -47,11 +46,11 @@ public class Message implements Serializable {
     @XmlAttribute
     private final int ordinal;
 
-    private Message() {
-        this(new Message.Builder(), new ViewContext());
+    public Message() {
+        this(new Message.Builder());
     }
 
-    private Message(Message.Builder builder, ViewContext context) {
+    private Message(Message.Builder builder) {
         this.messageId = builder.messageId;
         this.text = builder.text;
         this.type = builder.type;
@@ -94,11 +93,7 @@ public class Message implements Serializable {
         }
 
         public Message build() {
-            return build(null);
-        }
-
-        public Message build(ViewContext context) {
-            return new Message(this, context);
+            return new Message(this);
         }
 
         public Builder messageId(String messageId) {

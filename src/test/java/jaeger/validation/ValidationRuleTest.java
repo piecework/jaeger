@@ -15,14 +15,10 @@
  */
 package jaeger.validation;
 
+import jaeger.Constants;
+import jaeger.exception.ValidationRuleException;
+import jaeger.model.*;
 import org.junit.Test;
-import piecework.Constants;
-import piecework.common.ManyMap;
-import piecework.exception.ValidationRuleException;
-import piecework.model.Constraint;
-import piecework.model.Option;
-import piecework.model.User;
-import piecework.model.Value;
 
 import java.util.Collections;
 import java.util.regex.Pattern;

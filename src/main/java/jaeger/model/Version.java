@@ -17,9 +17,6 @@ package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.apache.commons.lang.StringUtils;
-import piecework.common.ViewContext;
-import piecework.model.ProcessInstance;
-import piecework.model.User;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -36,7 +33,6 @@ public class Version implements Serializable {
     private final String contentId;
     private final String location;
     private transient final User createdByUser;
-    private transient final String link;
 
     public Version() {
         this.label = null;
@@ -45,17 +41,15 @@ public class Version implements Serializable {
         this.contentId = null;
         this.location = null;
         this.createdByUser = null;
-        this.link = null;
     }
 
-    public Version(Version version, Map<String, User> userMap, String processDefinitionKey, String processInstanceId, String fieldName, ViewContext context) {
+    public Version(Version version, Map<String, User> userMap, String processDefinitionKey, String processInstanceId, String fieldName) {
         this.label = version.getLabel();
         this.createdBy = version.getCreatedBy();
         this.createDate = version.getCreateDate();
         this.contentId = version.getContentId();
         this.location = version.getLocation();
         this.createdByUser = version.getCreatedBy() != null ? userMap.get(version.getCreatedBy()) : null;
-        this.link = context != null && StringUtils.isNotEmpty(processInstanceId) ? context.getSsoUrl(ProcessInstance.Constants.ROOT_ELEMENT_NAME, processDefinitionKey, processInstanceId, "value", fieldName, version.getContentId()) : null;
     }
 
     public Version(String label, String createdBy, long createDate, String id, String location) {
@@ -65,7 +59,6 @@ public class Version implements Serializable {
         this.contentId = id;
         this.location = location;
         this.createdByUser = null;
-        this.link = null;
     }
 
     public String getLabel() {
@@ -92,7 +85,4 @@ public class Version implements Serializable {
         return createdByUser;
     }
 
-    public String getLink() {
-        return link;
-    }
 }

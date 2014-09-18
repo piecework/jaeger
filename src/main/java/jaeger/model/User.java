@@ -18,14 +18,12 @@ package jaeger.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.apache.cxf.common.util.StringUtils;
+import jaeger.security.AccessAuthority;
+import jaeger.security.IdentityDetails;
+import jaeger.security.Sanitizer;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.data.annotation.Id;
 import org.springframework.security.core.userdetails.UserDetails;
-import piecework.authorization.AccessAuthority;
-import piecework.common.ManyMap;
-import piecework.common.ViewContext;
-import piecework.identity.IdentityDetails;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
@@ -59,17 +57,14 @@ public class User extends Entity {
     @XmlElement
     private final String phoneNumber;
 
-    @XmlElement
-    private final String uri;
-
     @XmlTransient
     private final ManyMap<String, String> attributes;
 
-    private User() {
-        this(new User.Builder(), new ViewContext());
+    public User() {
+        this(new User.Builder());
     }
 
-    private User(User.Builder builder, ViewContext context) {
+    private User(User.Builder builder) {
         super(builder.userId, EntityType.PERSON, builder.accessAuthority);
         this.userId = builder.userId;
         this.visibleId = builder.visibleId;
@@ -77,7 +72,6 @@ public class User extends Entity {
         this.emailAddress = builder.emailAddress;
         this.phoneNumber = builder.phoneNumber;
         this.attributes = builder.attributes;
-        this.uri = context != null ? context.getSsoUrl(Constants.ROOT_ELEMENT_NAME, builder.userId) : null;
     }
 
     public boolean isEmpty() {
@@ -114,10 +108,6 @@ public class User extends Entity {
     public String getValue() {
         return null;
     }
-
-    public String getUri() {
-		return uri;
-	}
 
     public String toString() {
         return displayName;
@@ -191,11 +181,7 @@ public class User extends Entity {
         }
 
         public User build() {
-            return new User(this, null);
-        }
-
-        public User build(ViewContext context) {
-            return new User(this, context);
+            return new User(this);
         }
 
         public Builder userId(String userId) {

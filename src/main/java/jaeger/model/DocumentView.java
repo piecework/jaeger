@@ -15,8 +15,47 @@
  */
 package jaeger.model;
 
+import jaeger.Utility;
+
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author James Renfro
  */
 public class DocumentView {
+
+    private final String namespace;
+    private final String documentId;
+    private final Map<String, List<Value>> data;
+    private final List<Attachment> attachments;
+
+    public DocumentView(Document document, Context context) {
+        this.namespace = document.getNamespace();
+        this.documentId = document.getDocumentId();
+
+        this.data = Utility.filter(document.getData(), context, false);
+
+        if (context.isAllowAttachments()) {
+            this.attachments = document.getAttachments();
+        } else {
+            this.attachments = null;
+        }
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public String getDocumentId() {
+        return documentId;
+    }
+
+    public Map<String, List<Value>> getData() {
+        return data;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
 }

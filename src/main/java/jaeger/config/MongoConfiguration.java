@@ -17,8 +17,8 @@ package jaeger.config;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoClientOptions;
-import consolidate.MongoProperties;
-import consolidate.model.Worker;
+import jaeger.model.Document;
+import jaeger.properties.MongoProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,13 +34,13 @@ import javax.net.ssl.SSLSocketFactory;
 
 /**
  * Configures Spring Data Mongo classes, setting the necessary options to use ssl if that value
- * is set in {@link consolidate.MongoProperties} -- note that it also delegates to MongoProperties
+ * is set in {@link jaeger.properties.MongoProperties} -- note that it also delegates to MongoProperties
  * to attach credentials and set connection information.
  *
  * @author James Renfro
  */
 @Configuration
-@EnableMongoRepositories(basePackages="consolidate.repository",repositoryImplementationPostfix="CustomImpl")
+@EnableMongoRepositories(basePackages="jaeger.repository",repositoryImplementationPostfix="CustomImpl")
 public class MongoConfiguration extends AbstractMongoConfiguration {
 
     @Autowired
@@ -84,7 +84,7 @@ public class MongoConfiguration extends AbstractMongoConfiguration {
 
     @Override
     protected String getMappingBasePackage() {
-        return Worker.class.getPackage().getName();
+        return Document.class.getPackage().getName();
     }
 
 }

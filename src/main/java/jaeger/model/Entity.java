@@ -17,8 +17,8 @@ package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
+import jaeger.security.AccessAuthority;
 import org.apache.commons.lang.StringUtils;
-import piecework.authorization.AccessAuthority;
 
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collections;
@@ -54,10 +54,10 @@ public class Entity extends Value {
     }
 
     @JsonIgnore
-    public boolean hasRole(Process process, String... allowedRoles) {
-        if (process != null && StringUtils.isNotEmpty(process.getProcessDefinitionKey())) {
+    public boolean hasRole(String namespace, String... allowedRoles) {
+        if (namespace != null && StringUtils.isNotEmpty(namespace)) {
             Set<String> allowedRoleSet = allowedRoles != null && allowedRoles.length > 0 ? Sets.newHashSet(allowedRoles) : null;
-            if (accessAuthority.hasRole(process, allowedRoleSet))
+            if (accessAuthority.hasRole(namespace, allowedRoleSet))
                 return true;
         }
 

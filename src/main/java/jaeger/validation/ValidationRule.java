@@ -15,11 +15,13 @@
  */
 package jaeger.validation;
 
+import jaeger.Utility;
+import jaeger.exception.ValidationRuleException;
+import jaeger.model.*;
 import org.apache.commons.lang.StringUtils;
+
 import org.apache.commons.validator.routines.EmailValidator;
-import piecework.exception.ValidationRuleException;
-import piecework.model.*;
-import piecework.util.ConstraintUtil;
+
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -134,12 +136,12 @@ public class ValidationRule {
     }
 
     private void evaluateConstraint(Map<String, List<Value>> submissionData) throws ValidationRuleException {
-        if (!ConstraintUtil.evaluate(null, submissionData, constraint))
+        if (!Utility.evaluate(null, submissionData, constraint))
             throw new ValidationRuleException(this, "Not a valid input for this field");
     }
 
     private void evaluateConstraintRequired(Map<String, List<Value>> submissionData) throws ValidationRuleException {
-        if (ConstraintUtil.evaluate(null, submissionData, constraint))
+        if (Utility.evaluate(null, submissionData, constraint))
             evaluateRequired(submissionData);
     }
 
@@ -163,7 +165,7 @@ public class ValidationRule {
     }
 
     private void evaluateNumberOfInputs(Map<String, List<Value>> submissionData, Map<String, List<Value>> instanceData, boolean onlyAcceptValidInputs) throws ValidationRuleException {
-        if (constraint != null && !ConstraintUtil.evaluate(null, submissionData, constraint))
+        if (constraint != null && !Utility.evaluate(null, submissionData, constraint))
             return;
 
         int numberOfInputs = 0;
@@ -295,7 +297,7 @@ public class ValidationRule {
     }
 
     private void evaluateValuesMatch(Map<String, List<Value>> submissionData) throws ValidationRuleException {
-        if (constraint != null && !ConstraintUtil.evaluate(null, submissionData, constraint))
+        if (constraint != null && !Utility.evaluate(null, submissionData, constraint))
             return;
 
         List<? extends Value> values = safeValues(name, submissionData);

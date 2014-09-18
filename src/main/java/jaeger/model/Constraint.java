@@ -17,10 +17,9 @@ package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jaeger.security.Sanitizer;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import piecework.common.ViewContext;
-import piecework.security.Sanitizer;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -62,26 +61,19 @@ public class Constraint implements Serializable {
     @XmlElementWrapper(name="or")
     @XmlElementRef
     private final List<Constraint> or;
-
-//    @XmlElementWrapper(name="subconstraints")
-//    @XmlElementRef
-//    private final List<Constraint> subconstraints;
 	
 	@XmlAttribute
     private final int ordinal;
-	
-	@XmlElement
-    private final String link;
 	
 	@XmlTransient
     @JsonIgnore
     private final boolean isDeleted;
 	
-	private Constraint() {
-        this(new Constraint.Builder(), new ViewContext());
+	public Constraint() {
+        this(new Constraint.Builder());
     }
 
-    private Constraint(Constraint.Builder builder, ViewContext context) {
+    private Constraint(Constraint.Builder builder) {
     	this.constraintId = builder.constraintId;
         this.name = builder.name;
         this.type = builder.type;
@@ -90,8 +82,6 @@ public class Constraint implements Serializable {
         this.isDeleted = builder.isDeleted;
         this.and = builder.and != null ? Collections.unmodifiableList(builder.and) : null;
         this.or = builder.or != null ? Collections.unmodifiableList(builder.or) : null;
-//        this.subconstraints = builder.subconstraints != null ? Collections.unmodifiableList(builder.subconstraints) : null;
-        this.link = context != null ? context.getSsoUrl(Constants.ROOT_ELEMENT_NAME, builder.processDefinitionKey, builder.constraintId) : null;
     }
 
 	public String getConstraintId() {
@@ -114,10 +104,6 @@ public class Constraint implements Serializable {
 		return ordinal;
 	}
 
-	public String getLink() {
-		return link;
-	}
-
 	public boolean isDeleted() {
 		return isDeleted;
 	}
@@ -129,9 +115,6 @@ public class Constraint implements Serializable {
     public List<Constraint> getOr() {
         return or;
     }
-//    public List<Constraint> getSubconstraints() {
-//        return subconstraints;
-//    }
 
     public final static class Builder {
 
@@ -172,22 +155,12 @@ public class Constraint implements Serializable {
                 }
             }
 
-//            if (constraint.subconstraints != null && !constraint.subconstraints.isEmpty()) {
-//                this.subconstraints = new ArrayList<Constraint>(constraint.subconstraints.size());
-//                for (Constraint subconstraint : constraint.subconstraints) {
-//                    this.subconstraints.add(new Constraint.Builder(subconstraint, sanitizer).build());
-//                }
-//            }
         }
 
         public Constraint build() {
-            return new Constraint(this, null);
+            return new Constraint(this);
         }
 
-        public Constraint build(ViewContext context) {
-            return new Constraint(this, context);
-        }
-        
         public Builder constraintId(String constraintId) {
             this.constraintId = constraintId;
             return this;

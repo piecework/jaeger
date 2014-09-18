@@ -16,8 +16,6 @@
 package jaeger.security;
 
 import org.springframework.security.core.GrantedAuthority;
-import piecework.model.Process;
-import piecework.security.Sanitizer;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -31,7 +29,7 @@ public class ResourceAuthority implements GrantedAuthority {
 	private static final long serialVersionUID = 1L;
 	
 	private final String role;
-	private final Set<String> processDefinitionKeys;
+	private final Set<String> namespaces;
 
     protected ResourceAuthority() {
         this(new Builder());
@@ -39,33 +37,33 @@ public class ResourceAuthority implements GrantedAuthority {
 	
 	private ResourceAuthority(Builder builder) {
 		this.role = builder.role;
-		this.processDefinitionKeys = builder.processDefinitionKeys != null ? Collections.unmodifiableSet(builder.processDefinitionKeys) : null;
+		this.namespaces = builder.namespaces != null ? Collections.unmodifiableSet(builder.namespaces) : null;
 	}
 
-    public boolean hasRole(Process process, Set<String> allowedRoleSet) {
+    public boolean hasRole(String namespace, Set<String> allowedRoleSet) {
         if (allowedRoleSet == null || allowedRoleSet.contains(getRole())) {
-            Set<String> processDefinitionKeys = getProcessDefinitionKeys();
-            if (processDefinitionKeys == null || processDefinitionKeys.contains(process.getProcessDefinitionKey()))
+            Set<String> namespaces = getNamespaces();
+            if (namespaces == null || namespaces.contains(namespace))
                 return true;
         }
         return false;
     }
 
-	public boolean isAuthorized(String roleAllowed, String processDefinitionKeyAllowed) {
+	public boolean isAuthorized(String roleAllowed, String namespaceAllowed) {
 		if (roleAllowed == null)
 			return false;
-		return role.equals(roleAllowed) && (processDefinitionKeyAllowed == null || processDefinitionKeys.isEmpty() || processDefinitionKeys.contains(processDefinitionKeyAllowed));
+		return role.equals(roleAllowed) && (namespaceAllowed == null || namespaces.isEmpty() || namespaces.contains(namespaceAllowed));
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder("{").append(role);
 		builder.append(":");
-		if (processDefinitionKeys != null && !processDefinitionKeys.isEmpty()) {
+		if (namespaces != null && !namespaces.isEmpty()) {
             builder.append("[");
 			int count = 1;
-			int size = processDefinitionKeys.size();
-			for (String processDefinitionKey : processDefinitionKeys) {
+			int size = namespaces.size();
+			for (String processDefinitionKey : namespaces) {
 				builder.append(processDefinitionKey);
 				
 				if (count < size)
@@ -83,17 +81,17 @@ public class ResourceAuthority implements GrantedAuthority {
 		return toString();
 	}
 
-    public Set<String> getProcessDefinitionKeys(Set<String> allowedRoleSet) {
+    public Set<String> getNamespaces(Set<String> allowedRoleSet) {
         if (allowedRoleSet == null || allowedRoleSet.contains(getRole())) {
-            Set<String> processDefinitionKeys = getProcessDefinitionKeys();
-            if (processDefinitionKeys != null && !processDefinitionKeys.isEmpty())
-                return processDefinitionKeys;
+            Set<String> namespaces = getNamespaces();
+            if (namespaces != null && !namespaces.isEmpty())
+                return namespaces;
         }
         return Collections.emptySet();
     }
 
-	public Set<String> getProcessDefinitionKeys() {
-		return processDefinitionKeys;
+	public Set<String> getNamespaces() {
+		return namespaces;
 	}
 
 	public String getRole() {
@@ -104,7 +102,7 @@ public class ResourceAuthority implements GrantedAuthority {
     public final static class Builder {
 
         private String role;
-        private Set<String> processDefinitionKeys;
+        private Set<String> namespaces;
 
         public Builder() {
             super();
@@ -112,10 +110,10 @@ public class ResourceAuthority implements GrantedAuthority {
 
         public Builder(ResourceAuthority authority, Sanitizer sanitizer) {
             this.role = sanitizer.sanitize(authority.role);
-            if (authority.processDefinitionKeys != null && !authority.processDefinitionKeys.isEmpty()) {
-                this.processDefinitionKeys = new HashSet<String>(authority.processDefinitionKeys.size());
-                for (String processDefinitionKey : authority.processDefinitionKeys) {
-                    this.processDefinitionKeys.add(sanitizer.sanitize(processDefinitionKey));
+            if (authority.namespaces != null && !authority.namespaces.isEmpty()) {
+                this.namespaces = new HashSet<String>(authority.namespaces.size());
+                for (String processDefinitionKey : authority.namespaces) {
+                    this.namespaces.add(sanitizer.sanitize(processDefinitionKey));
                 }
             }
         }
@@ -129,10 +127,10 @@ public class ResourceAuthority implements GrantedAuthority {
             return this;
         }
 
-        public Builder processDefinitionKey(String processDefinitionKey) {
-            if (this.processDefinitionKeys == null)
-                this.processDefinitionKeys = new HashSet<String>();
-            this.processDefinitionKeys.add(processDefinitionKey);
+        public Builder namespace(String namespace) {
+            if (this.namespaces == null)
+                this.namespaces = new HashSet<String>();
+            this.namespaces.add(namespace);
             return this;
         }
 

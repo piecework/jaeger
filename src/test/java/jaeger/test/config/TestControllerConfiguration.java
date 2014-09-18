@@ -15,8 +15,45 @@
  */
 package jaeger.test.config;
 
+import jaeger.controller.DocumentController;
+import jaeger.model.User;
+import jaeger.security.AccessAuthority;
+import jaeger.security.IdentityHelper;
+import org.mockito.Mockito;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.Set;
+
+import static org.mockito.Matchers.any;
+
 /**
  * @author James Renfro
  */
+@Configuration
 public class TestControllerConfiguration {
+
+    @Bean
+    public DocumentController documentController() {
+        return new DocumentController();
+    }
+
+    @Bean
+    public IdentityHelper identityHelper() {
+        AccessAuthority accessAuthority = Mockito.mock(AccessAuthority.class);
+        User testUser = Mockito.mock(User.class);
+        IdentityHelper helper = Mockito.mock(IdentityHelper.class);
+
+        Mockito.doReturn(true)
+               .when(accessAuthority).hasGroup(any(Set.class));
+
+        Mockito.doReturn(testUser)
+               .when(helper).getPrincipal();
+
+        Mockito.doReturn(accessAuthority)
+               .when(testUser).getAccessAuthority();
+
+        return helper;
+    }
+
 }

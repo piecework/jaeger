@@ -15,8 +15,8 @@
  */
 package jaeger;
 
-import piecework.Registrant;
-import piecework.model.Option;
+
+import jaeger.model.Option;
 
 import java.util.List;
 

@@ -19,6 +19,8 @@ import com.github.fakemongo.Fongo;
 import com.google.common.io.Files;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
+import jaeger.model.DateValue;
+import jaeger.model.Document;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +35,6 @@ import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 import org.springframework.data.mongodb.core.convert.CustomConversions;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import piecework.model.DateValue;
-import piecework.model.ProcessInstance;
-import piecework.repository.concrete.EmbeddedMongoInstance;
 
 import java.io.File;
 import java.net.UnknownHostException;
@@ -47,15 +46,13 @@ import java.util.List;
  * @author James Renfro
  */
 @Configuration
-@EnableMongoRepositories(basePackages="piecework.repository",repositoryImplementationPostfix="CustomImpl")
+@EnableMongoRepositories(basePackages="jaeger.repository",repositoryImplementationPostfix="CustomImpl")
 public class FongoConfiguration extends AbstractMongoConfiguration {
 
 	private static final Logger LOG = Logger.getLogger(FongoConfiguration.class);
 
     @Autowired
     Environment environment;
-
-    private EmbeddedMongoInstance mongoInstance;
 
     @Bean
     @Primary
@@ -101,7 +98,7 @@ public class FongoConfiguration extends AbstractMongoConfiguration {
 
     @Override
     protected String getMappingBasePackage() {
-        return ProcessInstance.class.getPackage().getName();
+        return Document.class.getPackage().getName();
     }
 
     @Override
@@ -109,20 +106,6 @@ public class FongoConfiguration extends AbstractMongoConfiguration {
         String mongoUsername = environment.getProperty("mongo.username");
         String mongoPassword = environment.getProperty("mongo.password");
         return new UserCredentials(mongoUsername, mongoPassword);
-    }
-
-    private EmbeddedMongoInstance embeddedMongo() {
-        String mongoDb = environment.getProperty("mongo.db");
-        String mongoUsername = environment.getProperty("mongo.username");
-        String mongoPassword = environment.getProperty("mongo.password");
-        String mongoFilesystem = environment.getProperty("mongo.filesystem");
-
-        if (StringUtils.isEmpty(mongoFilesystem)) {
-            File temporaryDirectory = Files.createTempDir();
-            mongoFilesystem = temporaryDirectory.getAbsolutePath();
-        }
-
-        return new EmbeddedMongoInstance("127.0.0.1", 37017, mongoDb, mongoUsername, mongoPassword, mongoFilesystem);
     }
 
 	private List<ServerAddress> getServerAddresses() throws UnknownHostException {

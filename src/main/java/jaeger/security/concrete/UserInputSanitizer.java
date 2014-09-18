@@ -15,13 +15,13 @@
  */
 package jaeger.security.concrete;
 
+import jaeger.model.ManyMap;
+import jaeger.security.Sanitizer;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.owasp.validator.html.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import piecework.common.ManyMap;
-import piecework.security.Sanitizer;
 
 import java.util.LinkedList;
 import java.util.List;

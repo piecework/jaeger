@@ -1,0 +1,111 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        maven { url "http://repo.spring.io/libs-release" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'spring-boot'
+apply plugin: 'war'
+
+configurations {
+    jaxDoclet
+    providedRuntime
+}
+
+configurations.all {
+    exclude group: 'log4j', module: 'log4j'
+    exclude group: 'org.slf4j', module: 'slf4j-jdk14'
+}
+
+applicationDefaultJvmArgs = ["-Xms1024m", "-Xmx2048m", "-XX:MaxPermSize=512m", "-Dfile.encoding=UTF-8"]
+group = 'jaeger'
+
+war {
+    archiveName = 'jaeger.war'
+    baseName = 'jaeger'
+    version =  '0.1.0'
+}
+
+springBoot {
+    mainClass = 'jaeger.ApplicationConfiguration'
+}
+
+bootRun {
+    if ( project.hasProperty('args') ) {
+        args project.args.split('\\s+')
+    }
+}
+
+sourceSets.main.java {
+    srcDir 'src/main/generated'
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://repo.spring.io/libs-release" }
+    maven { url "https://clojars.org/repo" }
+}
+
+dependencies {
+    compile('commons-io:commons-io:1.4')
+    compile group: 'commons-collections', name: 'commons-collections', version:'3.2'
+    compile ('org.apache.httpcomponents:httpclient:4.3.5')
+    compile ('org.apache.httpcomponents:httpclient-cache:4.3.5')
+    compile ('org.apache.httpcomponents:httpmime:4.3.5')
+    compile "com.mangofactory:swagger-springmvc:0.8.8"
+    compile "org.ajar:swagger-spring-mvc-ui:0.2"
+    compile group: 'commons-validator', name: 'commons-validator', version:'1.4.0'
+    compile group: 'org.owasp.antisamy', name: 'antisamy', version:'1.4.4'
+    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version:'1.50'
+
+    compile group: 'org.springframework.security', name: 'spring-security-config', version:'3.2.4.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-ldap', version:'3.2.4.RELEASE'
+    compile group: 'org.springframework.security', name: 'spring-security-web', version:'3.2.4.RELEASE'
+
+    compile("org.springframework.data:spring-data-rest-webmvc")
+
+    compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compile("org.springframework.boot:spring-boot-starter-web")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-starter-security")
+    compile("org.springframework.boot:spring-boot-starter-ws")
+
+    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+
+    testCompile("com.github.fakemongo:fongo:1.5.3")
+    testCompile("org.springframework.boot:spring-boot-starter-test")
+}
+
+task generateJavadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    exclude 'com/workday/**'
+}
+
+task tarJavadocs(type: Tar, dependsOn:generateJavadocs) {
+    archiveName = 'docs.tar.gz'
+    destinationDir = new File(project.buildDir.path)
+    compression = Compression.GZIP
+    from (project.buildDir.path + '/docs')
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.11'
+}
+
+idea {
+    module {
+        inheritOutputDirs = false
+        outputDir = file("$buildDir/classes/main/")
+    }
+}
+
+
