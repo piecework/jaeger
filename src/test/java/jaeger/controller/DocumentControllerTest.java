@@ -6,6 +6,7 @@ import jaeger.exception.UnauthorizedException;
 import jaeger.model.*;
 import jaeger.repository.ContextRepository;
 import jaeger.repository.DocumentRepository;
+import jaeger.resource.DocumentResource;
 import jaeger.test.config.FongoConfiguration;
 import jaeger.test.config.TestControllerConfiguration;
 import org.junit.Assert;
@@ -21,8 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes={TestControllerConfiguration.class, FongoConfiguration.class})
@@ -106,7 +105,7 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadDefault() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentView view = documentController.read(TEST_DOCUMENT_ID);
+        DocumentResource view = documentController.read(TEST_DOCUMENT_ID);
 
         Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
         Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
@@ -118,7 +117,7 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadEditContext() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentView view = documentController.read(TEST_DOCUMENT_ID, TEST_EDIT_CONTEXT_ID);
+        DocumentResource view = documentController.read(TEST_DOCUMENT_ID, TEST_EDIT_CONTEXT_ID);
 
         Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
         Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
@@ -131,7 +130,7 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadAnyContext() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentView view = documentController.read(TEST_DOCUMENT_ID, TEST_ANY_CONTEXT_ID);
+        DocumentResource view = documentController.read(TEST_DOCUMENT_ID, TEST_ANY_CONTEXT_ID);
 
         Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
         Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
@@ -144,7 +143,7 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadAttachContext() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentView view = documentController.read(TEST_DOCUMENT_ID, TEST_ATTACH_CONTEXT_ID);
+        DocumentResource view = documentController.read(TEST_DOCUMENT_ID, TEST_ATTACH_CONTEXT_ID);
 
         Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
         Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());

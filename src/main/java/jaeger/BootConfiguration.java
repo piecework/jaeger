@@ -40,7 +40,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan
 @PropertySource(value = {"file:/etc/jaeger/jaeger.properties"}, ignoreResourceNotFound = true)
 @EnableConfigurationProperties({MongoProperties.class})
-public class ApplicationConfiguration {
+public class BootConfiguration {
 
     @Bean
     public ServletRegistrationBean dispatcherServlet(ApplicationContext applicationContext) {
@@ -50,7 +50,7 @@ public class ApplicationConfiguration {
     }
 
     public static void main(String[] args) throws Exception {
-        SpringApplication springApplication = new SpringApplication(ApplicationConfiguration.class);
+        SpringApplication springApplication = new SpringApplication(BootConfiguration.class);
         springApplication.run(args);
     }
 

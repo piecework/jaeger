@@ -13,9 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.model;
+package jaeger.resource;
 
 import jaeger.Utility;
+import jaeger.model.Attachment;
+import jaeger.model.Context;
+import jaeger.model.Document;
+import jaeger.model.Value;
+import org.springframework.hateoas.ResourceSupport;
 
 import java.util.List;
 import java.util.Map;
@@ -23,20 +28,20 @@ import java.util.Map;
 /**
  * @author James Renfro
  */
-public class DocumentView {
+public class DocumentResource extends ResourceSupport {
 
     private final String namespace;
     private final String documentId;
     private final Map<String, List<Value>> data;
     private final List<Attachment> attachments;
 
-    public DocumentView(Document document, Context context) {
+    public DocumentResource(Document document, Context context) {
         this.namespace = document.getNamespace();
         this.documentId = document.getDocumentId();
 
         this.data = Utility.filter(document.getData(), context, false);
 
-        if (context.isAllowAttachments()) {
+        if (context != null && context.isAllowAttachments()) {
             this.attachments = document.getAttachments();
         } else {
             this.attachments = null;
@@ -58,4 +63,5 @@ public class DocumentView {
     public List<Attachment> getAttachments() {
         return attachments;
     }
+
 }

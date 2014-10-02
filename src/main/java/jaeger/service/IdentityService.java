@@ -13,23 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.config;
+package jaeger.service;
 
-import jaeger.BootConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
+import jaeger.model.User;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Provides a connector between the Java Servlet and Spring so that we don't have to provide
- * a WEB-INF/web.xml file in the war archive.
- *
  * @author James Renfro
  */
-public class WebServletInitializer extends SpringBootServletInitializer {
+public interface IdentityService {
 
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(BootConfiguration.class);
-    }
+    User getUser(String id);
+
+    User getUserWithAccessAuthority(String id);
+
+    List<User> findUsersByDisplayName(String displayNameLike, Long maxResults);
+
+    Map<String, User> findUsers(Set<String> ids);
 
 }

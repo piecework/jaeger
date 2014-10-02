@@ -17,13 +17,25 @@ package jaeger;
 
 import com.google.common.collect.Sets;
 import com.mongodb.DBObject;
+import jaeger.controller.DocumentController;
 import jaeger.enumeration.FieldTag;
+import jaeger.exception.ResourceNotFoundException;
 import jaeger.model.*;
+import jaeger.validation.DataFilter;
 import jaeger.validation.ValidationRule;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.hateoas.PagedResources;
+import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 import java.util.*;
 import java.util.regex.Pattern;
+
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
 /**
  * @author James Renfro
@@ -32,15 +44,6 @@ public class Utility {
 
     private static final Set<String> FREEFORM_INPUT_TYPES = Sets.newHashSet(FieldTag.FieldTypes.TEXT, FieldTag.FieldTypes.TEXTAREA, FieldTag.FieldTypes.PERSON, "current-date", "current-user");
             //"textarea", "person-lookup", "current-date", "current-user");
-
-
-    public static boolean canView(Entity entity, Context context) {
-        return entity != null && entity.getAccessAuthority() != null && entity.getAccessAuthority().hasGroup(context.getViewGroups());
-    }
-
-    public static boolean canEdit(Entity entity, Context context) {
-        return entity != null && entity.getAccessAuthority() != null && entity.getAccessAuthority().hasGroup(context.getEditGroups());
-    }
 
     public static boolean hasConstraint(String type, List<Constraint> constraints) {
         return getConstraint(type, constraints) != null;
@@ -56,7 +59,7 @@ public class Utility {
         return null;
     }
 
-    public static boolean evaluate(Map<String, Field> fieldMap, Map<String, List<Value>> submissionData, Constraint constraint) {
+    public static <T> boolean evaluate(Map<String, Field> fieldMap, Map<String, List<T>> submissionData, Constraint constraint) {
         if (constraint == null)
             return true;
 
@@ -67,7 +70,7 @@ public class Utility {
         boolean isSatisfied = false;
 
         Field constraintField = fieldMap != null ? fieldMap.get(constraintName) : null;
-        List<? extends Value> values = submissionData != null ? submissionData.get(constraintName) : null;
+        List<T> values = submissionData != null ? submissionData.get(constraintName) : null;
 
         // Evaluate whether this particular item is satisfied
         if (constraintField != null && (values == null || values.isEmpty())) {
@@ -75,8 +78,11 @@ public class Utility {
             isSatisfied = defaultFieldValue != null && pattern.matcher(defaultFieldValue).matches();
         } else {
             if (values != null) {
-                for (Value value : values) {
-                    isSatisfied = values != null && pattern.matcher(value.getValue()).matches();
+                for (T value : values) {
+                    CharSequence actual = null;
+                    if (value instanceof Value)
+                        actual = ((Value)value).getValue();
+                    isSatisfied = values != null && actual != null && pattern.matcher(actual).matches();
                     if (!isSatisfied)
                         break;
                 }
@@ -95,7 +101,7 @@ public class Utility {
         return isSatisfied;
     }
 
-    public static boolean checkAll(String type, Map<String, Field> fieldMap, Map<String, List<Value>> submissionData, List<Constraint> constraints) {
+    public static <T> boolean checkAll(String type, Map<String, Field> fieldMap, Map<String, List<T>> submissionData, List<Constraint> constraints) {
         if (constraints != null && !constraints.isEmpty()) {
             for (Constraint constraint : constraints) {
                 if (type == null || constraint.getType() == null || constraint.getType().equals(type)) {
@@ -107,7 +113,7 @@ public class Utility {
         return true;
     }
 
-    public static boolean checkAny(String type, Map<String, Field> fieldMap, Map<String, List<Value>> submissionData, List<Constraint> constraints) {
+    public static <T> boolean checkAny(String type, Map<String, Field> fieldMap, Map<String, List<T>> submissionData, List<Constraint> constraints) {
         if (constraints != null && !constraints.isEmpty()) {
             for (Constraint constraint : constraints) {
                 if (type == null || constraint.getType() == null || constraint.getType().equals(type)) {
@@ -137,20 +143,59 @@ public class Utility {
         return fieldName;
     }
 
+    public static ManyMap<String, Value> filter(Collection<Field> fields, Map<String, List<Value>> original, DataFilter... dataFilters) {
+        ManyMap<String, Value> map = new ManyMap<String, Value>();
+
+        // Need to allow for adding default values -- in which case, the map may be empty
+        Set<String> keys = new HashSet<String>();
+        if (fields != null && !fields.isEmpty()) {
+            for (Field field : fields) {
+                if (StringUtils.isEmpty(field.getName()))
+                    continue;
+                keys.add(field.getName());
+            }
+        }
+
+        if (original == null)
+            original = Collections.emptyMap();
+
+        if (!original.isEmpty()) {
+            keys.addAll(original.keySet());
+        }
+
+        if (keys != null && !keys.isEmpty()) {
+            for (String key : keys) {
+                List<Value> values = original.get(key);
+                if (dataFilters != null) {
+                    for (DataFilter dataFilter : dataFilters) {
+                        values = dataFilter.filter(key, values);
+                    }
+                }
+                if (values != null && !values.isEmpty())
+                    map.put(key, values);
+            }
+        }
+
+        return map;
+    }
+
     public static <T> Map<String, List<T>> filter(Map<String, List<T>> data, Context context, boolean limitToEditable) {
+        if (context == null)
+            return null;
+
         if (context.isAllowAny()) {
             // If the context allows any data then all the data
             // will be included
             return data;
         } else {
-            Set<Field> fields = context.getFields();
+            Map<String, Field> fields = context.getFields();
 
             if (fields == null || fields.isEmpty())
                 return Collections.emptyMap();
 
             Map<String, List<T>> filtered = new ManyMap<String, T>();
 
-            for (Field field : fields) {
+            for (Field field : fields.values()) {
                 if (StringUtils.isEmpty(field.getName()))
                     continue;
 
@@ -211,6 +256,25 @@ public class Utility {
         }
 
         return keywords;
+    }
+
+    public static Pageable pageable(Integer size, Integer pageNumber) {
+        int selectedPage = pageNumber != null ? pageNumber.intValue() : 0;
+        int selectedSize = size != null ? size.intValue() : 20;
+        return new PageRequest(selectedPage, selectedSize);
+    }
+
+    public static <E, R extends ResourceSupport> PagedResources<R> pagedResources(Page<E> page, ResourceAssemblerSupport<E, R> assembler) throws ResourceNotFoundException {
+        if (page == null)
+            throw new ResourceNotFoundException("Search returned no results");
+
+        PagedResources.PageMetadata pageMetadata = new PagedResources.PageMetadata(page.getSize(), page.getNumber(), page.getTotalElements(), page.getTotalPages());
+        List<E> entities = page.getContent();
+        List<R> resources = assembler.toResources(entities);
+
+        PagedResources<R> pagedResources = new PagedResources<R>(resources, pageMetadata);
+        pagedResources.add(linkTo(methodOn(DocumentController.class).search(20, 0)).withSelfRel());
+        return pagedResources;
     }
 
     public static OptionResolver resolveConstraints(Field field, FieldTag fieldTag, Set<ValidationRule> rules, Registry registry) {

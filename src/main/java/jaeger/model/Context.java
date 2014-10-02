@@ -18,11 +18,15 @@ package jaeger.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
  * A context determines who is able to read or write to a document, and which fields are
- * viewable, editable, and required
+ * viewable, editable, and required.
+ *
+ * Permissions to view or edit can be applied at the namespace or based on a specific
+ *
  *
  * @author James Renfro
  */
@@ -34,7 +38,7 @@ public class Context {
     @Id
     private String contextId;
 
-    private Set<Field> fields;
+    private Map<String, Field> fields;
 
     private Set<String> viewGroups;
 
@@ -62,11 +66,11 @@ public class Context {
         this.contextId = contextId;
     }
 
-    public Set<Field> getFields() {
+    public Map<String, Field> getFields() {
         return fields;
     }
 
-    public void setFields(Set<Field> fields) {
+    public void setFields(Map<String, Field> fields) {
         this.fields = fields;
     }
 

@@ -28,6 +28,7 @@ import java.util.Set;
 /**
  * @author James Renfro
  */
+@org.springframework.data.mongodb.core.mapping.Document(collection = "instance")
 public class Document {
 
     @Indexed

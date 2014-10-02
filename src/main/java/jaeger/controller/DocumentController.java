@@ -16,14 +16,24 @@
 package jaeger.controller;
 
 import jaeger.Utility;
+import jaeger.enumeration.AccessLevel;
 import jaeger.exception.ResourceNotFoundException;
 import jaeger.exception.UnauthorizedException;
 import jaeger.model.*;
 import jaeger.repository.ContextRepository;
 import jaeger.repository.DocumentRepository;
+import jaeger.resource.DocumentResource;
+import jaeger.resource.assembler.DocumentResourceAssembler;
+import jaeger.security.AccessChecker;
 import jaeger.security.IdentityHelper;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
+import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.PagedResources;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartRequest;
@@ -35,8 +45,12 @@ import java.util.Map;
  * @author James Renfro
  */
 @RestController
+@ExposesResourceFor(DocumentResource.class)
 @RequestMapping("v1/data")
 public class DocumentController {
+
+    @Autowired
+    private AccessChecker accessChecker;
 
     @Autowired
     private ContextRepository contextRepository;
@@ -49,10 +63,11 @@ public class DocumentController {
 
 
     @RequestMapping(value = "{documentId}/{contextId}", method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public DocumentView attach(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultipartRequest request) throws ResourceNotFoundException, UnauthorizedException {
+    public DocumentResource attach(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultipartRequest request) throws ResourceNotFoundException, UnauthorizedException {
         Context context = getContext(contextId);
+        Document document = getDocument(documentId);
 
-        if (!Utility.canEdit(identityHelper.getPrincipal(), context))
+        if (accessChecker.check(document, context, identityHelper.getPrincipal()) != AccessLevel.EDIT)
             throw new UnauthorizedException();
 
         request.getMultiFileMap();
@@ -65,9 +80,8 @@ public class DocumentController {
         // TODO: if there are, then set them as File values, otherwise, if the context allows attachments,
         // TODO: set them as attachments
 
-        Document document = null;
-
-        return new DocumentView(document, context);
+        DocumentResourceAssembler documentResourceAssembler = new DocumentResourceAssembler(context);
+        return documentResourceAssembler.toResource(document);
     }
 
     /**
@@ -78,7 +92,7 @@ public class DocumentController {
      * @throws ResourceNotFoundException
      */
     @RequestMapping(value = "{documentId}", method = RequestMethod.GET)
-    public DocumentView read(@PathVariable("documentId") String documentId) throws ResourceNotFoundException, UnauthorizedException {
+    public DocumentResource read(@PathVariable("documentId") String documentId) throws ResourceNotFoundException, UnauthorizedException {
         // Use the document id as the default context id
         return read(documentId, documentId);
     }
@@ -92,15 +106,24 @@ public class DocumentController {
      * @throws ResourceNotFoundException
      */
     @RequestMapping(value = "{documentId}/{contextId}", method = RequestMethod.GET)
-    public DocumentView read(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId) throws ResourceNotFoundException, UnauthorizedException {
+    public DocumentResource read(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId) throws ResourceNotFoundException, UnauthorizedException {
         Context context = getContext(contextId);
-
-        if (!Utility.canView(identityHelper.getPrincipal(), context))
-            throw new UnauthorizedException();
-
         Document document = getDocument(documentId);
 
-        return new DocumentView(document, context);
+        if (accessChecker.check(document, context, identityHelper.getPrincipal()) == AccessLevel.NONE)
+            throw new UnauthorizedException();
+
+        DocumentResourceAssembler documentResourceAssembler = new DocumentResourceAssembler(context);
+        return documentResourceAssembler.toResource(document);
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    public PagedResources<DocumentResource> search(
+            @RequestParam(defaultValue = "20", required = false, value = "size") Integer size,
+            @RequestParam(defaultValue = "0", required = false, value = "page") Integer pageNumber) throws ResourceNotFoundException {
+
+        Page<Document> page = documentRepository.findAll(Utility.pageable(size, pageNumber));
+        return Utility.pagedResources(page, new DocumentResourceAssembler());
     }
 
     /**
@@ -114,17 +137,19 @@ public class DocumentController {
      * @throws UnauthorizedException
      */
     @RequestMapping(value = "{documentId}/{contextId}", method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE })
-    public DocumentView update(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultiValueMap<String, String> data) throws ResourceNotFoundException, UnauthorizedException {
+    public DocumentResource update(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultiValueMap<String, String> data) throws ResourceNotFoundException, UnauthorizedException {
         Context context = getContext(contextId);
+        Document document = getDocument(documentId);
 
-        if (!Utility.canEdit(identityHelper.getPrincipal(), context))
+        if (accessChecker.check(document, context, identityHelper.getPrincipal()) != AccessLevel.EDIT)
             throw new UnauthorizedException();
 
         Map<String, List<String>> filteredData = Utility.filter(data, context, true);
 
-        Document document = documentRepository.update(documentId, filteredData);
+        document = documentRepository.update(documentId, filteredData);
 
-        return new DocumentView(document, context);
+        DocumentResourceAssembler documentResourceAssembler = new DocumentResourceAssembler(context);
+        return documentResourceAssembler.toResource(document);
     }
 
     private Context getContext(String contextId) throws ResourceNotFoundException {

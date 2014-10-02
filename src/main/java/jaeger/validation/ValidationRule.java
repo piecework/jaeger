@@ -90,7 +90,7 @@ public class ValidationRule {
                 .toString();
     }
 
-    public void evaluate(Map<String, List<Value>> submissionData, Map<String, List<Value>> instanceData, boolean onlyAcceptValidInputs) throws ValidationRuleException {
+    public <T> void evaluate(Map<String, List<T>> submissionData, Map<String, List<Value>> instanceData, boolean onlyAcceptValidInputs) throws ValidationRuleException {
         switch(type) {
         case CONSTRAINED:
             evaluateConstraint(submissionData);
@@ -135,17 +135,17 @@ public class ValidationRule {
         return name;
     }
 
-    private void evaluateConstraint(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateConstraint(Map<String, List<T>> submissionData) throws ValidationRuleException {
         if (!Utility.evaluate(null, submissionData, constraint))
             throw new ValidationRuleException(this, "Not a valid input for this field");
     }
 
-    private void evaluateConstraintRequired(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateConstraintRequired(Map<String, List<T>> submissionData) throws ValidationRuleException {
         if (Utility.evaluate(null, submissionData, constraint))
             evaluateRequired(submissionData);
     }
 
-    private void evaluateEmail(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateEmail(Map<String, List<T>> submissionData) throws ValidationRuleException {
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
             if (value != null && StringUtils.isNotEmpty(value.getValue()) && !EmailValidator.getInstance().isValid(value.getValue()))
@@ -153,7 +153,7 @@ public class ValidationRule {
         }
     }
 
-    private void evaluateOptions(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateOptions(Map<String, List<T>> submissionData) throws ValidationRuleException {
         if (options == null || options.isEmpty())
             throw new ValidationRuleException(this, "No valid options for this field");
 
@@ -164,7 +164,7 @@ public class ValidationRule {
         }
     }
 
-    private void evaluateNumberOfInputs(Map<String, List<Value>> submissionData, Map<String, List<Value>> instanceData, boolean onlyAcceptValidInputs) throws ValidationRuleException {
+    private <T> void evaluateNumberOfInputs(Map<String, List<T>> submissionData, Map<String, List<Value>> instanceData, boolean onlyAcceptValidInputs) throws ValidationRuleException {
         if (constraint != null && !Utility.evaluate(null, submissionData, constraint))
             return;
 
@@ -203,7 +203,7 @@ public class ValidationRule {
             throw new ValidationRuleException(this, "At least " + minInputs + " are required");
     }
 
-    private void evaluateNumeric(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateNumeric(Map<String, List<T>> submissionData) throws ValidationRuleException {
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
             if (value != null && StringUtils.isNotEmpty(value.getValue()) && !value.getValue().matches("^[0-9]+$"))
@@ -211,7 +211,7 @@ public class ValidationRule {
         }
     }
 
-    private void evaluatePattern(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluatePattern(Map<String, List<T>> submissionData) throws ValidationRuleException {
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
             if (value != null && StringUtils.isNotEmpty(value.getValue()) && pattern != null && !pattern.matcher(value.getValue()).matches()) {
@@ -224,7 +224,7 @@ public class ValidationRule {
         }
     }
 
-    private void evaluateRequired(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateRequired(Map<String, List<T>> submissionData) throws ValidationRuleException {
         boolean hasAtLeastOneValue = false;
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
@@ -248,7 +248,7 @@ public class ValidationRule {
             throw new ValidationRuleException(this, "Field is required");
     }
 
-    private void evaluateRequiredIfNoPrevious(Map<String, List<Value>> submissionData, Map<String, List<Value>> instanceData) throws ValidationRuleException {
+    private <T> void evaluateRequiredIfNoPrevious(Map<String, List<T>> submissionData, Map<String, List<Value>> instanceData) throws ValidationRuleException {
         boolean hasAtLeastOneValue = false;
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
@@ -274,7 +274,7 @@ public class ValidationRule {
             throw new ValidationRuleException(this, "Field is required");
     }
 
-    private void evaluateValidUser(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateValidUser(Map<String, List<T>> submissionData) throws ValidationRuleException {
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
             if (value != null) {
@@ -284,7 +284,7 @@ public class ValidationRule {
         }
     }
 
-    private void evaluateValueLength(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateValueLength(Map<String, List<T>> submissionData) throws ValidationRuleException {
         List<? extends Value> values = safeValues(name, submissionData);
         for (Value value : values) {
             if (value != null && value.getValue() != null) {
@@ -296,7 +296,7 @@ public class ValidationRule {
         }
     }
 
-    private void evaluateValuesMatch(Map<String, List<Value>> submissionData) throws ValidationRuleException {
+    private <T> void evaluateValuesMatch(Map<String, List<T>> submissionData) throws ValidationRuleException {
         if (constraint != null && !Utility.evaluate(null, submissionData, constraint))
             return;
 
@@ -311,11 +311,19 @@ public class ValidationRule {
         }
     }
 
-    private List<? extends Value> safeValues(String name, Map<String, List<Value>> submissionData) {
-        List<? extends Value> values = null;
+    private <T> List<? extends Value> safeValues(String name, Map<String, List<T>> submissionData) {
+        List<Value> values = null;
 
-        if (name != null && submissionData != null)
-            values = submissionData.get(name);
+        if (name != null && submissionData != null) {
+            List<T> anyValues = submissionData.get(name);
+            values = new ArrayList<Value>();
+            for (T anyValue : anyValues) {
+                if (anyValue instanceof Value)
+                    values.add((Value)anyValue);
+                else if (anyValue != null)
+                    values.add(new Value(anyValue.toString()));
+            }
+        }
 
         if (values == null)
             values = Collections.<Value>emptyList();

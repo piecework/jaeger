@@ -15,34 +15,57 @@
  */
 package jaeger.validation;
 
+import jaeger.Registry;
+import jaeger.Utility;
+import jaeger.exception.ValidationRuleException;
 import jaeger.model.*;
+import jaeger.repository.DocumentRepository;
+import jaeger.security.AccessChecker;
+import jaeger.security.AccessTracker;
 import jaeger.security.EncryptionService;
+import jaeger.service.IdentityService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * @author James Renfro
  */
 public class ValidationService {
 
+    private final static Logger LOGGER = Logger.getLogger(ValidationService.class.getName());
+
+    public enum ValidationType { VALIDATION, SAVE, SUBMISSION };
+
+    @Autowired
+    private AccessChecker accessChecker;
+
+    @Autowired
+    private AccessTracker accessTracker;
+
+    @Autowired
+    private DocumentRepository documentRepository;
+
     @Autowired
     private EncryptionService encryptionService;
 
-    // TODO: This should replace the ValidationFactory logic with something much simpler
-    public <T> Validation validate(Document document, Context context, Map<String, List<T>> data) {
-        Set<Field> fields = context.getFields();
-//        Map<Field, List<ValidationRule>> fieldRuleMap = template.getFieldRuleMap();
-//        Set<String> allFieldNames = Collections.unmodifiableSet(new HashSet<String>(template.getFieldMap().keySet()));
-//        Set<String> fieldNames = new HashSet<String>(template.getFieldMap().keySet());
+    @Autowired
+    private IdentityService identityService;
 
-        Map<String, List<Value>> instanceData = document != null ? document.getData() : null;
-        Map<String, List<T>> submissionData = data;
+    @Autowired
+    private Registry registry;
 
-        Map<String, List<Value>> decryptedInstanceData = null;
-        Map<String, List<Value>> decryptedSubmissionData = null;
+
+    public <T> Validation validate(Document document, Context context, Map<String, List<T>> data, ValidationType type, Entity entity) {
+        Map<String, Field> fields = context.getFields();
+
+        // Don't want to keep doing null checks below
+        if (fields == null)
+            fields = Collections.emptyMap();
+
         String reason = "User is submitting data that needs to be validated";
 
         Validation.Builder validationBuilder = new Validation.Builder();
@@ -53,55 +76,58 @@ public class ValidationService {
         //   3. If a field passes validation, then add it to the list of fields to be updated
         //   4. If a field does not pass validation, then add it to the list of error messages to return
 
-        if (fields != null) {
-            for (Field field : fields) {
+        if (data != null) {
+            Map<String, List<Value>> decryptedInstanceData = decryptData(document, context, entity);
 
+            Map<String, List<T>> validData = new HashMap<String, List<T>>();
+            for (Map.Entry<String, List<T>> entry : data.entrySet()) {
+                String fieldName = entry.getKey();
+
+                // If a field exists, then it should be used to validate the data for this field name
+                Field field = fields.get(fieldName);
+
+                boolean isValid = false;
+
+                if (field == null && context.isAllowAny()) {
+                    isValid = true;
+                } else if (field != null) {
+                    Set<ValidationRule> rules = Utility.validationRules(field, registry);
+
+                    if (rules != null) {
+                        isValid = true;
+                        for (ValidationRule rule : rules) {
+                            try {
+                                rule.evaluate(data, decryptedInstanceData, type == ValidationType.SAVE);
+                            } catch (ValidationRuleException e) {
+                                LOGGER.warning("Invalid input: " + e.getMessage() + " " + e.getRule());
+                                validationBuilder.error(rule.getName(), e.getMessage());
+                                isValid = false;
+                            }
+                        }
+                    }
+                }
+
+                if (isValid)
+                    validData.put(fieldName, entry.getValue());
 
             }
+
+            // For anything other than pure validation, persist any data that's valid
+            if (type != ValidationType.VALIDATION && !validData.isEmpty())
+                documentRepository.update(document.getDocumentId(), validData);
         }
-
-
-//        if (fields != null) {
-//            decryptedSubmissionData = dataFilterService.allSubmissionData(modelProvider, submission, reason);
-//
-//            task = ModelUtility.task(modelProvider);
-//            if (task != null)
-//                decryptedInstanceData = dataFilterService.authorizedInstanceData(modelProvider, fields, version, reason, isAllowAny);
-//
-//            for (Field field : fields) {
-//                List<ValidationRule> rules = fieldRuleMap != null && field.getName() != null ? fieldRuleMap.get(field) : Collections.<ValidationRule>emptyList();
-//                validateField(modelProvider, validationBuilder, field, rules, fieldNames, submissionData, instanceData, decryptedSubmissionData, decryptedInstanceData, onlyAcceptValidInputs, false);
-//            }
-//        }
-//
-//        if (isAllowAny) {
-//            if (!submissionData.isEmpty()) {
-//                if (task == null)
-//                    task = ModelUtility.task(modelProvider);
-//                if (task != null)
-//                    decryptedInstanceData = dataFilterService.authorizedInstanceData(modelProvider, Collections.<Field>emptySet(), version, reason, isAllowAny);
-//
-//                if (decryptedSubmissionData == null)
-//                    decryptedSubmissionData = dataFilterService.allSubmissionData(modelProvider, submission, reason);
-//
-//                for (Map.Entry<String, List<Value>> entry : submissionData.entrySet()) {
-//                    String fieldName = entry.getKey();
-//
-//                    if (!allFieldNames.contains(fieldName)) {
-//                        Field field = new Field.Builder()
-//                                .name(fieldName)
-//                                .type(null)
-//                                .maxInputs(10)
-//                                .build();
-//
-//                        validateField(modelProvider, validationBuilder, field, Collections.<ValidationRule>emptyList(), fieldNames, submissionData, instanceData, decryptedSubmissionData, decryptedInstanceData, onlyAcceptValidInputs, true);
-//                    }
-//                }
-//            }
-//        }
 
         return validationBuilder.build();
     }
 
+    private Map<String, List<Value>> decryptData(Document document, Context context, Entity entity) {
+        Collection<Field> fields = context.getFields().values();
+        String reason = "To validate new input";
+        Map<String, List<Value>> data = document.getData();
+        DataFilter decryptValuesFilter = new DecryptValuesFilter(document, reason, accessTracker, encryptionService, entity, false);
+        DataFilter limitFieldsFilter = context.isAllowAny() ? new NoOpFilter() : new LimitFieldsFilter(fields, true);
+        DataFilter decorateValuesFilter = new DecorateValuesFilter(document, context, fields, entity, accessChecker, identityService);
+        return Utility.filter(fields, data, limitFieldsFilter, decryptValuesFilter, decorateValuesFilter);
+    }
 
 }

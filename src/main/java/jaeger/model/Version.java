@@ -43,7 +43,7 @@ public class Version implements Serializable {
         this.createdByUser = null;
     }
 
-    public Version(Version version, Map<String, User> userMap, String processDefinitionKey, String processInstanceId, String fieldName) {
+    public Version(Version version, Map<String, User> userMap) {
         this.label = version.getLabel();
         this.createdBy = version.getCreatedBy();
         this.createDate = version.getCreateDate();

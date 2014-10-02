@@ -13,23 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.config;
-
-import jaeger.BootConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
+package jaeger.enumeration;
 
 /**
- * Provides a connector between the Java Servlet and Spring so that we don't have to provide
- * a WEB-INF/web.xml file in the war archive.
- *
  * @author James Renfro
  */
-public class WebServletInitializer extends SpringBootServletInitializer {
-
-    @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(BootConfiguration.class);
-    }
-
+public enum AlarmSeverity {
+    MINOR, MAJOR, URGENT
 }

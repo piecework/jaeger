@@ -5,14 +5,14 @@ buildscript {
         maven { url "http://repo.spring.io/libs-release" }
     }
     dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.6.RELEASE")
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.1.7.RELEASE")
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'spring-boot'
-apply plugin: 'war'
+
 
 configurations {
     jaxDoclet
@@ -27,14 +27,14 @@ configurations.all {
 applicationDefaultJvmArgs = ["-Xms1024m", "-Xmx2048m", "-XX:MaxPermSize=512m", "-Dfile.encoding=UTF-8"]
 group = 'jaeger'
 
-war {
-    archiveName = 'jaeger.war'
+jar {
+    archiveName = 'jaeger.jar'
     baseName = 'jaeger'
     version =  '0.1.0'
 }
 
 springBoot {
-    mainClass = 'jaeger.ApplicationConfiguration'
+    mainClass = 'jaeger.BootConfiguration'
 }
 
 bootRun {
@@ -66,6 +66,7 @@ dependencies {
     compile group: 'org.owasp.antisamy', name: 'antisamy', version:'1.4.4'
     compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version:'1.50'
 
+    compile("org.springframework.hateoas:spring-hateoas")
     compile group: 'org.springframework.security', name: 'spring-security-config', version:'3.2.4.RELEASE'
     compile group: 'org.springframework.security', name: 'spring-security-ldap', version:'3.2.4.RELEASE'
     compile group: 'org.springframework.security', name: 'spring-security-web', version:'3.2.4.RELEASE'

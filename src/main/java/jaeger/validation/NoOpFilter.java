@@ -13,23 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.config;
+package jaeger.validation;
 
-import jaeger.BootConfiguration;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.boot.context.web.SpringBootServletInitializer;
+import jaeger.model.Value;
+
+import java.util.List;
 
 /**
- * Provides a connector between the Java Servlet and Spring so that we don't have to provide
- * a WEB-INF/web.xml file in the war archive.
- *
  * @author James Renfro
  */
-public class WebServletInitializer extends SpringBootServletInitializer {
+public class NoOpFilter implements DataFilter {
 
     @Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(BootConfiguration.class);
+    public List<Value> filter(String key, List<Value> values) {
+        return values;
     }
 
 }
