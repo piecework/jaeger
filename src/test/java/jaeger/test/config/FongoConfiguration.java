@@ -16,12 +16,10 @@
 package jaeger.test.config;
 
 import com.github.fakemongo.Fongo;
-import com.google.common.io.Files;
 import com.mongodb.Mongo;
 import com.mongodb.ServerAddress;
 import jaeger.model.DateValue;
 import jaeger.model.Document;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +34,6 @@ import org.springframework.data.mongodb.core.convert.CustomConversions;
 import org.springframework.data.mongodb.gridfs.GridFsTemplate;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-import java.io.File;
 import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.LinkedList;

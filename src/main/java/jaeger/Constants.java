@@ -34,6 +34,10 @@ public class Constants {
         public static final String SCREEN_IS_DISPLAYED_WHEN_ACTION_TYPE = "SCREEN_IS_DISPLAYED_WHEN_ACTION_TYPE";
     }
 
+    public static class SpringProfiles {
+        public static final String DEBUG_IDENTITY = "debugIdentity";
+    }
+
     public static class ValidationStatus {
         public static final String ERROR = "error";
         public static final String SUCCESS = "success";

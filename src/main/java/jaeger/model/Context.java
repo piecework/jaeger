@@ -15,6 +15,7 @@
  */
 package jaeger.model;
 
+import jaeger.enumeration.ContextType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
@@ -35,14 +36,13 @@ public class Context {
     @Indexed
     private String namespace;
 
+    @Indexed
+    private ContextType type;
+
     @Id
     private String contextId;
 
     private Map<String, Field> fields;
-
-    private Set<String> viewGroups;
-
-    private Set<String> editGroups;
 
     private boolean allowAttachments;
 
@@ -56,6 +56,14 @@ public class Context {
 
     public void setNamespace(String namespace) {
         this.namespace = namespace;
+    }
+
+    public ContextType getType() {
+        return type;
+    }
+
+    public void setType(ContextType type) {
+        this.type = type;
     }
 
     public String getContextId() {
@@ -72,22 +80,6 @@ public class Context {
 
     public void setFields(Map<String, Field> fields) {
         this.fields = fields;
-    }
-
-    public Set<String> getViewGroups() {
-        return viewGroups;
-    }
-
-    public void setViewGroups(Set<String> viewGroups) {
-        this.viewGroups = viewGroups;
-    }
-
-    public Set<String> getEditGroups() {
-        return editGroups;
-    }
-
-    public void setEditGroups(Set<String> editGroups) {
-        this.editGroups = editGroups;
     }
 
     public boolean isAllowAttachments() {

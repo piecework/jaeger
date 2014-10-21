@@ -15,12 +15,10 @@
  */
 package jaeger.resource.assembler;
 
-import jaeger.controller.DocumentController;
-import jaeger.exception.ResourceNotFoundException;
-import jaeger.exception.UnauthorizedException;
+import jaeger.controller.DataController;
 import jaeger.model.Context;
 import jaeger.model.Document;
-import jaeger.resource.DocumentResource;
+import jaeger.resource.DataView;
 import org.springframework.hateoas.mvc.ResourceAssemblerSupport;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -29,24 +27,24 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 /**
  * @author James Renfro
  */
-public class DocumentResourceAssembler extends ResourceAssemblerSupport<Document, DocumentResource> {
+public class DataViewAssembler extends ResourceAssemblerSupport<Document, DataView> {
 
     private final Context context;
 
-    public DocumentResourceAssembler() {
+    public DataViewAssembler() {
         this(null);
     }
 
-    public DocumentResourceAssembler(Context context) {
-        super(DocumentController.class, DocumentResource.class);
+    public DataViewAssembler(Context context) {
+        super(DataController.class, DataView.class);
         this.context = context;
     }
 
     @Override
-    public DocumentResource toResource(Document document) {
-        DocumentResource resource = new DocumentResource(document, context);
+    public DataView toResource(Document document) {
+        DataView resource = new DataView(document, context);
         try {
-            resource.add(linkTo(methodOn(DocumentController.class).read(document.getDocumentId())).withSelfRel());
+            resource.add(linkTo(methodOn(DataController.class).read(document.getDocumentId())).withSelfRel());
         } catch (Exception e) {
             // This won't actually happen, since we're not executing the read method above
         }

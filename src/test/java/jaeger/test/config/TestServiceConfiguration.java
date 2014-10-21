@@ -13,21 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.model;
+package jaeger.test.config;
 
-import jaeger.security.PermissionAuthority;
+import jaeger.repository.DocumentRepository;
+import jaeger.service.DataViewService;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * @author James Renfro
  */
-public class Application extends Entity {
+@Configuration
+public class TestServiceConfiguration {
 
-    public Application(String entityId) {
-        this(entityId, null);
-    }
-
-    public Application(String entityId, PermissionAuthority permissionAuthority) {
-        super(entityId, EntityType.SYSTEM, permissionAuthority);
+    @Bean
+    public DataViewService dataViewService() {
+        return new DataViewService();
     }
 
 }

@@ -31,11 +31,11 @@ public class AccessChecker {
      */
     public AccessLevel check(Document document, Context context, Entity principal) {
 
-        if (principal != null && principal.getAccessAuthority() != null && principal.getAccessAuthority().hasGroup(context.getEditGroups()))
-            return AccessLevel.EDIT;
-
-        if (principal != null && principal.getAccessAuthority() != null && principal.getAccessAuthority().hasGroup(context.getViewGroups()))
-            return AccessLevel.VIEW;
+//        if (principal != null && principal.getPermissionAuthority() != null && principal.getPermissionAuthority().hasGroup(context.getEditGroups()))
+//            return AccessLevel.EDIT;
+//
+//        if (principal != null && principal.getPermissionAuthority() != null && principal.getPermissionAuthority().hasGroup(context.getViewGroups()))
+//            return AccessLevel.VIEW;
 
         return AccessLevel.NONE;
     }

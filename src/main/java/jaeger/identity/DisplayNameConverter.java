@@ -13,21 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.model;
-
-import jaeger.security.PermissionAuthority;
+package jaeger.identity;
 
 /**
  * @author James Renfro
  */
-public class Application extends Entity {
+public interface DisplayNameConverter {
 
-    public Application(String entityId) {
-        this(entityId, null);
-    }
-
-    public Application(String entityId, PermissionAuthority permissionAuthority) {
-        super(entityId, EntityType.SYSTEM, permissionAuthority);
-    }
+    public String convert(String original);
 
 }

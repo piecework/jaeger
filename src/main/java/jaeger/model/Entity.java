@@ -17,7 +17,7 @@ package jaeger.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Sets;
-import jaeger.security.AccessAuthority;
+import jaeger.security.PermissionAuthority;
 import org.apache.commons.lang.StringUtils;
 
 import javax.xml.bind.annotation.XmlTransient;
@@ -38,42 +38,42 @@ public class Entity extends Value {
     private final EntityType entityType;
 
     @XmlTransient
-    private final AccessAuthority accessAuthority;
+    private final PermissionAuthority permissionAuthority;
 
     private Entity actingAs;
 
-    protected Entity(String entityId, EntityType entityType, AccessAuthority accessAuthority) {
+    protected Entity(String entityId, EntityType entityType, PermissionAuthority permissionAuthority) {
         this.entityId = entityId;
         this.entityType = entityType;
-        this.accessAuthority = accessAuthority;
+        this.permissionAuthority = permissionAuthority;
     }
 
     @JsonIgnore
-    public AccessAuthority getAccessAuthority() {
-        return accessAuthority;
+    public PermissionAuthority getPermissionAuthority() {
+        return permissionAuthority;
     }
 
-    @JsonIgnore
-    public boolean hasRole(String namespace, String... allowedRoles) {
-        if (namespace != null && StringUtils.isNotEmpty(namespace)) {
-            Set<String> allowedRoleSet = allowedRoles != null && allowedRoles.length > 0 ? Sets.newHashSet(allowedRoles) : null;
-            if (accessAuthority.hasRole(namespace, allowedRoleSet))
-                return true;
-        }
-
-        return false;
-    }
-
-    @JsonIgnore
-    public Set<String> getProcessDefinitionKeys(String... allowedRoles) {
-        Set<String> allowedRoleSet = allowedRoles != null && allowedRoles.length > 0 ? Sets.newHashSet(allowedRoles) : null;
-        Set<String> processDefinitionKeys = accessAuthority.getProcessDefinitionKeys(allowedRoleSet);
-
-        if (processDefinitionKeys == null)
-            return Collections.emptySet();
-
-        return processDefinitionKeys;
-    }
+//    @JsonIgnore
+//    public boolean hasRole(String namespace, String... allowedRoles) {
+//        if (namespace != null && StringUtils.isNotEmpty(namespace)) {
+//            Set<String> allowedRoleSet = allowedRoles != null && allowedRoles.length > 0 ? Sets.newHashSet(allowedRoles) : null;
+//            if (permissionAuthority.hasRole(namespace, allowedRoleSet))
+//                return true;
+//        }
+//
+//        return false;
+//    }
+//
+//    @JsonIgnore
+//    public Set<String> getProcessDefinitionKeys(String... allowedRoles) {
+//        Set<String> allowedRoleSet = allowedRoles != null && allowedRoles.length > 0 ? Sets.newHashSet(allowedRoles) : null;
+//        Set<String> processDefinitionKeys = permissionAuthority.getProcessDefinitionKeys(allowedRoleSet);
+//
+//        if (processDefinitionKeys == null)
+//            return Collections.emptySet();
+//
+//        return processDefinitionKeys;
+//    }
 
     @JsonIgnore
     public String getEntityId() {

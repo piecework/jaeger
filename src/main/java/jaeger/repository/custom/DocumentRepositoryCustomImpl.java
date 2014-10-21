@@ -47,6 +47,12 @@ public class DocumentRepositoryCustomImpl implements DocumentRepositoryCustom {
     private static final FindAndModifyOptions findAndModifyAndReturnNew = new FindAndModifyOptions().returnNew(true).upsert(true);
 
     @Override
+    public List<Document> findByNamespaces(Set<String> namespaces) {
+        Query query = Query.query(Criteria.where("namespace").in(namespaces));
+        return mongoOperations.find(query, Document.class);
+    }
+
+    @Override
     public <T> Document update(String documentId, Map<String, List<T>> data) {
         Query query = Query.query(Criteria.where("_id").is(documentId));
         Update update = constructUpdate(documentId, data);

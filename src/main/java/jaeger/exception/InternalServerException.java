@@ -13,21 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.model;
+package jaeger.exception;
 
-import jaeger.security.PermissionAuthority;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author James Renfro
  */
-public class Application extends Entity {
+@ResponseStatus(value = HttpStatus.NOT_FOUND)
+public class InternalServerException extends Exception {
 
-    public Application(String entityId) {
-        this(entityId, null);
+    public InternalServerException() {
+        super();
     }
 
-    public Application(String entityId, PermissionAuthority permissionAuthority) {
-        super(entityId, EntityType.SYSTEM, permissionAuthority);
+    public InternalServerException(String message) {
+        super(message);
+    }
+
+    public InternalServerException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public InternalServerException(Throwable cause) {
+        super(cause);
     }
 
 }

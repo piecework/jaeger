@@ -17,6 +17,7 @@ package jaeger.validation;
 
 import jaeger.Registry;
 import jaeger.Utility;
+import jaeger.enumeration.ValidationType;
 import jaeger.exception.ValidationRuleException;
 import jaeger.model.*;
 import jaeger.repository.DocumentRepository;
@@ -24,10 +25,8 @@ import jaeger.security.AccessChecker;
 import jaeger.security.AccessTracker;
 import jaeger.security.EncryptionService;
 import jaeger.service.IdentityService;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -37,8 +36,6 @@ import java.util.logging.Logger;
 public class ValidationService {
 
     private final static Logger LOGGER = Logger.getLogger(ValidationService.class.getName());
-
-    public enum ValidationType { VALIDATION, SAVE, SUBMISSION };
 
     @Autowired
     private AccessChecker accessChecker;
@@ -100,6 +97,7 @@ public class ValidationService {
                                 rule.evaluate(data, decryptedInstanceData, type == ValidationType.SAVE);
                             } catch (ValidationRuleException e) {
                                 LOGGER.warning("Invalid input: " + e.getMessage() + " " + e.getRule());
+                                validationBuilder.hasError(true);
                                 validationBuilder.error(rule.getName(), e.getMessage());
                                 isValid = false;
                             }

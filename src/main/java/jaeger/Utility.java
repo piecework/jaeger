@@ -16,8 +16,7 @@
 package jaeger;
 
 import com.google.common.collect.Sets;
-import com.mongodb.DBObject;
-import jaeger.controller.DocumentController;
+import jaeger.controller.DataController;
 import jaeger.enumeration.FieldTag;
 import jaeger.exception.ResourceNotFoundException;
 import jaeger.model.*;
@@ -273,7 +272,7 @@ public class Utility {
         List<R> resources = assembler.toResources(entities);
 
         PagedResources<R> pagedResources = new PagedResources<R>(resources, pageMetadata);
-        pagedResources.add(linkTo(methodOn(DocumentController.class).search(20, 0)).withSelfRel());
+        pagedResources.add(linkTo(methodOn(DataController.class).search(20, 0)).withSelfRel());
         return pagedResources;
     }
 

@@ -15,6 +15,8 @@
  */
 package jaeger;
 
+import jaeger.properties.DebugProperties;
+import jaeger.properties.SecurityProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
@@ -39,7 +41,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableWebMvc
 @ComponentScan
 @PropertySource(value = {"file:/etc/jaeger/jaeger.properties"}, ignoreResourceNotFound = true)
-@EnableConfigurationProperties({MongoProperties.class})
+@EnableConfigurationProperties({DebugProperties.class, MongoProperties.class, SecurityProperties.class})
 public class BootConfiguration {
 
     @Bean

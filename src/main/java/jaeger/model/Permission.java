@@ -15,7 +15,13 @@
  */
 package jaeger.model;
 
+import jaeger.enumeration.ContextType;
+import jaeger.enumeration.PermissionType;
+import jaeger.enumeration.PrincipalType;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Set;
 
 /**
  *
@@ -25,6 +31,77 @@ import org.springframework.security.core.GrantedAuthority;
  */
 public class Permission {
 
+    ContextType contextType;
 
+    PermissionType permissionType;
 
+    PrincipalType principalType;
+
+    String principalId;
+
+    String permissionId;
+
+    public Permission() {
+
+    }
+
+    public Permission(ContextType contextType, PermissionType permissionType, PrincipalType principalType, String principalId, String permissionId) {
+        this.contextType = contextType;
+        this.permissionType = permissionType;
+        this.principalType = principalType;
+        this.principalId = principalId;
+        this.permissionId = permissionId;
+    }
+
+    public boolean groupCanSearchByNamespace(String groupId, String namespace) {
+        return hasPermission(ContextType.SEARCH, PermissionType.NAMESPACE, PrincipalType.GROUP, groupId, namespace);
+    }
+
+    protected boolean hasPermission(ContextType contextType, PermissionType permissionType, PrincipalType principalType, String principalId, String permissionId) {
+        if (this.contextType == contextType && this.permissionType == permissionType
+                && this.principalType == principalType && StringUtils.isNotEmpty(principalId)) {
+            return this.principalId.equals(principalId) && this.permissionId.equals(permissionId);
+        }
+        return false;
+    }
+
+    public ContextType getContextType() {
+        return contextType;
+    }
+
+    public void setContextType(ContextType contextType) {
+        this.contextType = contextType;
+    }
+
+    public PermissionType getPermissionType() {
+        return permissionType;
+    }
+
+    public void setPermissionType(PermissionType permissionType) {
+        this.permissionType = permissionType;
+    }
+
+    public PrincipalType getPrincipalType() {
+        return principalType;
+    }
+
+    public void setPrincipalType(PrincipalType principalType) {
+        this.principalType = principalType;
+    }
+
+    public String getPrincipalId() {
+        return principalId;
+    }
+
+    public void setPrincipalId(String principalId) {
+        this.principalId = principalId;
+    }
+
+    public String getPermissionId() {
+        return permissionId;
+    }
+
+    public void setPermissionId(String permissionId) {
+        this.permissionId = permissionId;
+    }
 }

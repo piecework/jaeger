@@ -4,7 +4,6 @@ import jaeger.Utility;
 import jaeger.model.Document;
 import jaeger.model.ManyMap;
 import jaeger.model.Value;
-import jaeger.repository.DocumentRepository;
 import jaeger.test.config.FongoConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
@@ -17,8 +16,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes={FongoConfiguration.class})

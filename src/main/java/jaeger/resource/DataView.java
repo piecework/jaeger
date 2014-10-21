@@ -28,17 +28,19 @@ import java.util.Map;
 /**
  * @author James Renfro
  */
-public class DocumentResource extends ResourceSupport {
+public class DataView extends ResourceSupport {
 
     private final String namespace;
     private final String documentId;
+    private Map<String, String> metadata;
     private final Map<String, List<Value>> data;
     private final List<Attachment> attachments;
 
-    public DocumentResource(Document document, Context context) {
+    public DataView(Document document, Context context) {
         this.namespace = document.getNamespace();
         this.documentId = document.getDocumentId();
 
+        this.metadata = document.getMetadata();
         this.data = Utility.filter(document.getData(), context, false);
 
         if (context != null && context.isAllowAttachments()) {
@@ -54,6 +56,14 @@ public class DocumentResource extends ResourceSupport {
 
     public String getDocumentId() {
         return documentId;
+    }
+
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
     }
 
     public Map<String, List<Value>> getData() {

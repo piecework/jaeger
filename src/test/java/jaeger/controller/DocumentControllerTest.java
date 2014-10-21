@@ -6,19 +6,17 @@ import jaeger.exception.UnauthorizedException;
 import jaeger.model.*;
 import jaeger.repository.ContextRepository;
 import jaeger.repository.DocumentRepository;
-import jaeger.resource.DocumentResource;
+import jaeger.resource.DataView;
 import jaeger.test.config.FongoConfiguration;
 import jaeger.test.config.TestControllerConfiguration;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.util.collections.Sets;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,7 +36,7 @@ public class DocumentControllerTest {
     private ContextRepository contextRepository;
 
     @Autowired
-    private DocumentController documentController;
+    private DataController dataController;
 
     @Autowired
     private DocumentRepository documentRepository;
@@ -79,13 +77,11 @@ public class DocumentControllerTest {
         Context defaultContext = new Context();
         defaultContext.setContextId(document.getDocumentId());
         defaultContext.setNamespace(document.getNamespace());
-        defaultContext.setFields(Collections.singleton(viewOnlyTestField1));
         contextRepository.save(defaultContext);
 
         Context editContext = new Context();
         editContext.setContextId(TEST_EDIT_CONTEXT_ID);
         editContext.setNamespace(document.getNamespace());
-        editContext.setFields(Sets.newSet(editableTestField1, editableTestField2));
         contextRepository.save(editContext);
 
         Context anyContext = new Context();
@@ -97,7 +93,6 @@ public class DocumentControllerTest {
         Context attachmentContext = new Context();
         attachmentContext.setContextId(TEST_ATTACH_CONTEXT_ID);
         attachmentContext.setNamespace(document.getNamespace());
-        attachmentContext.setFields(Sets.newSet(editableTestField2));
         attachmentContext.setAllowAny(false);
         contextRepository.save(attachmentContext);
     }
@@ -105,24 +100,24 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadDefault() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentResource view = documentController.read(TEST_DOCUMENT_ID);
+        DataView dataView = dataController.read(TEST_DOCUMENT_ID);
 
-        Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
-        Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
+        Assert.assertEquals(TEST_DOCUMENT_ID, dataView.getDocumentId());
+        Assert.assertEquals(TEST_NAMESPACE, dataView.getNamespace());
 
-        Map<String, List<Value>> data = view.getData();
+        Map<String, List<Value>> data = dataView.getData();
         Assert.assertEquals(1, data.size());
     }
 
     @Test
     public void verifyReadEditContext() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentResource view = documentController.read(TEST_DOCUMENT_ID, TEST_EDIT_CONTEXT_ID);
+        DataView dataView = dataController.read(TEST_DOCUMENT_ID, TEST_EDIT_CONTEXT_ID);
 
-        Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
-        Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
+        Assert.assertEquals(TEST_DOCUMENT_ID, dataView.getDocumentId());
+        Assert.assertEquals(TEST_NAMESPACE, dataView.getNamespace());
 
-        Map<String, List<Value>> data = view.getData();
+        Map<String, List<Value>> data = dataView.getData();
         Assert.assertEquals(1, data.size());
         Assert.assertNull(data.get("hidden-test-field-1"));
     }
@@ -130,12 +125,12 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadAnyContext() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentResource view = documentController.read(TEST_DOCUMENT_ID, TEST_ANY_CONTEXT_ID);
+        DataView dataView = dataController.read(TEST_DOCUMENT_ID, TEST_ANY_CONTEXT_ID);
 
-        Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
-        Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
+        Assert.assertEquals(TEST_DOCUMENT_ID, dataView.getDocumentId());
+        Assert.assertEquals(TEST_NAMESPACE, dataView.getNamespace());
 
-        Map<String, List<Value>> data = view.getData();
+        Map<String, List<Value>> data = dataView.getData();
         Assert.assertEquals(2, data.size());
         Assert.assertEquals("This is never shown except for any", data.get("hidden-test-field-1").iterator().next().toString());
     }
@@ -143,12 +138,12 @@ public class DocumentControllerTest {
     @Test
     public void verifyReadAttachContext() throws ResourceNotFoundException, UnauthorizedException {
 
-        DocumentResource view = documentController.read(TEST_DOCUMENT_ID, TEST_ATTACH_CONTEXT_ID);
+        DataView dataView = dataController.read(TEST_DOCUMENT_ID, TEST_ATTACH_CONTEXT_ID);
 
-        Assert.assertEquals(TEST_DOCUMENT_ID, view.getDocumentId());
-        Assert.assertEquals(TEST_NAMESPACE, view.getNamespace());
+        Assert.assertEquals(TEST_DOCUMENT_ID, dataView.getDocumentId());
+        Assert.assertEquals(TEST_NAMESPACE, dataView.getNamespace());
 
-        Map<String, List<Value>> data = view.getData();
+        Map<String, List<Value>> data = dataView.getData();
         Assert.assertEquals(0, data.size());
         Assert.assertNull(data.get("hidden-test-field-1"));
     }

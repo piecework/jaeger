@@ -13,21 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package jaeger.model;
+package jaeger.repository.custom;
 
-import jaeger.security.PermissionAuthority;
+import jaeger.enumeration.ContextType;
+import jaeger.model.Context;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author James Renfro
  */
-public class Application extends Entity {
+public interface ContextRepositoryCustom {
 
-    public Application(String entityId) {
-        this(entityId, null);
-    }
-
-    public Application(String entityId, PermissionAuthority permissionAuthority) {
-        super(entityId, EntityType.SYSTEM, permissionAuthority);
-    }
+    List<Context> findByNamespacesAndTypes(Set<String> namespaces, Set<ContextType> types);
 
 }

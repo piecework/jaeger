@@ -317,11 +317,13 @@ public class ValidationRule {
         if (name != null && submissionData != null) {
             List<T> anyValues = submissionData.get(name);
             values = new ArrayList<Value>();
-            for (T anyValue : anyValues) {
-                if (anyValue instanceof Value)
-                    values.add((Value)anyValue);
-                else if (anyValue != null)
-                    values.add(new Value(anyValue.toString()));
+            if (anyValues != null) {
+                for (T anyValue : anyValues) {
+                    if (anyValue instanceof Value)
+                        values.add((Value) anyValue);
+                    else if (anyValue != null)
+                        values.add(new Value(anyValue.toString()));
+                }
             }
         }
 

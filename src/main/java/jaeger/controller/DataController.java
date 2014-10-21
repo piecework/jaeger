@@ -22,18 +22,15 @@ import jaeger.exception.UnauthorizedException;
 import jaeger.model.*;
 import jaeger.repository.ContextRepository;
 import jaeger.repository.DocumentRepository;
-import jaeger.resource.DocumentResource;
-import jaeger.resource.assembler.DocumentResourceAssembler;
+import jaeger.resource.DataView;
+import jaeger.resource.assembler.DataViewAssembler;
 import jaeger.security.AccessChecker;
 import jaeger.security.IdentityHelper;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Slice;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartRequest;
@@ -45,9 +42,9 @@ import java.util.Map;
  * @author James Renfro
  */
 @RestController
-@ExposesResourceFor(DocumentResource.class)
-@RequestMapping("v1/data")
-public class DocumentController {
+@ExposesResourceFor(DataView.class)
+@RequestMapping("v1/document")
+public class DataController {
 
     @Autowired
     private AccessChecker accessChecker;
@@ -63,7 +60,7 @@ public class DocumentController {
 
 
     @RequestMapping(value = "{documentId}/{contextId}", method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public DocumentResource attach(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultipartRequest request) throws ResourceNotFoundException, UnauthorizedException {
+    public DataView attach(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultipartRequest request) throws ResourceNotFoundException, UnauthorizedException {
         Context context = getContext(contextId);
         Document document = getDocument(documentId);
 
@@ -80,8 +77,8 @@ public class DocumentController {
         // TODO: if there are, then set them as File values, otherwise, if the context allows attachments,
         // TODO: set them as attachments
 
-        DocumentResourceAssembler documentResourceAssembler = new DocumentResourceAssembler(context);
-        return documentResourceAssembler.toResource(document);
+        DataViewAssembler dataViewAssembler = new DataViewAssembler(context);
+        return dataViewAssembler.toResource(document);
     }
 
     /**
@@ -92,7 +89,7 @@ public class DocumentController {
      * @throws ResourceNotFoundException
      */
     @RequestMapping(value = "{documentId}", method = RequestMethod.GET)
-    public DocumentResource read(@PathVariable("documentId") String documentId) throws ResourceNotFoundException, UnauthorizedException {
+    public DataView read(@PathVariable("documentId") String documentId) throws ResourceNotFoundException, UnauthorizedException {
         // Use the document id as the default context id
         return read(documentId, documentId);
     }
@@ -106,24 +103,27 @@ public class DocumentController {
      * @throws ResourceNotFoundException
      */
     @RequestMapping(value = "{documentId}/{contextId}", method = RequestMethod.GET)
-    public DocumentResource read(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId) throws ResourceNotFoundException, UnauthorizedException {
+    public DataView read(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId) throws ResourceNotFoundException, UnauthorizedException {
         Context context = getContext(contextId);
         Document document = getDocument(documentId);
 
         if (accessChecker.check(document, context, identityHelper.getPrincipal()) == AccessLevel.NONE)
             throw new UnauthorizedException();
 
-        DocumentResourceAssembler documentResourceAssembler = new DocumentResourceAssembler(context);
-        return documentResourceAssembler.toResource(document);
+        DataViewAssembler dataViewAssembler = new DataViewAssembler(context);
+        return dataViewAssembler.toResource(document);
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public PagedResources<DocumentResource> search(
+    public PagedResources<DataView> search(
             @RequestParam(defaultValue = "20", required = false, value = "size") Integer size,
             @RequestParam(defaultValue = "0", required = false, value = "page") Integer pageNumber) throws ResourceNotFoundException {
 
         Page<Document> page = documentRepository.findAll(Utility.pageable(size, pageNumber));
-        return Utility.pagedResources(page, new DocumentResourceAssembler());
+
+
+
+        return Utility.pagedResources(page, new DataViewAssembler());
     }
 
     /**
@@ -137,7 +137,7 @@ public class DocumentController {
      * @throws UnauthorizedException
      */
     @RequestMapping(value = "{documentId}/{contextId}", method = { RequestMethod.POST, RequestMethod.PUT }, consumes = { MediaType.APPLICATION_FORM_URLENCODED_VALUE })
-    public DocumentResource update(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultiValueMap<String, String> data) throws ResourceNotFoundException, UnauthorizedException {
+    public DataView update(@PathVariable("documentId") String documentId, @PathVariable("contextId") String contextId, @RequestBody MultiValueMap<String, String> data) throws ResourceNotFoundException, UnauthorizedException {
         Context context = getContext(contextId);
         Document document = getDocument(documentId);
 
@@ -148,8 +148,8 @@ public class DocumentController {
 
         document = documentRepository.update(documentId, filteredData);
 
-        DocumentResourceAssembler documentResourceAssembler = new DocumentResourceAssembler(context);
-        return documentResourceAssembler.toResource(document);
+        DataViewAssembler dataViewAssembler = new DataViewAssembler(context);
+        return dataViewAssembler.toResource(document);
     }
 
     private Context getContext(String contextId) throws ResourceNotFoundException {

@@ -18,7 +18,6 @@ package jaeger.security;
 import jaeger.model.Application;
 import jaeger.model.Entity;
 import jaeger.model.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -52,11 +51,11 @@ public class IdentityHelper {
             }
         }
 
-        AccessAuthority accessAuthority = null;
+        PermissionAuthority accessAuthority = null;
         if (authorities != null && !authorities.isEmpty()) {
             for (GrantedAuthority authority : authorities) {
-                if (authority instanceof AccessAuthority) {
-                    accessAuthority = AccessAuthority.class.cast(authority);
+                if (authority instanceof PermissionAuthority) {
+                    accessAuthority = PermissionAuthority.class.cast(authority);
                 }
             }
         }
@@ -68,7 +67,7 @@ public class IdentityHelper {
             return new Application(systemName, accessAuthority);
         }
 
-        return new User.Builder(identity).accessAuthority(accessAuthority).build();
+        return new User.Builder(identity).permissionAuthority(accessAuthority).build();
     }
 
 }

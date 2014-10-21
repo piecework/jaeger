@@ -18,8 +18,8 @@ package jaeger.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonValue;
-import jaeger.security.AccessAuthority;
 import jaeger.security.IdentityDetails;
+import jaeger.security.PermissionAuthority;
 import jaeger.security.Sanitizer;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.data.annotation.Id;
@@ -65,7 +65,7 @@ public class User extends Entity {
     }
 
     private User(User.Builder builder) {
-        super(builder.userId, EntityType.PERSON, builder.accessAuthority);
+        super(builder.userId, EntityType.PERSON, builder.permissionAuthority);
         this.userId = builder.userId;
         this.visibleId = builder.visibleId;
         this.displayName = builder.displayName;
@@ -121,7 +121,7 @@ public class User extends Entity {
         private String emailAddress;
         private String phoneNumber;
         private ManyMap<String, String> attributes;
-        private AccessAuthority accessAuthority;
+        private PermissionAuthority permissionAuthority;
 
         public Builder() {
             super();
@@ -217,8 +217,8 @@ public class User extends Entity {
             return this;
         }
 
-        public Builder accessAuthority(AccessAuthority accessAuthority) {
-            this.accessAuthority = accessAuthority;
+        public Builder permissionAuthority(PermissionAuthority permissionAuthority) {
+            this.permissionAuthority = permissionAuthority;
             return this;
         }
     }

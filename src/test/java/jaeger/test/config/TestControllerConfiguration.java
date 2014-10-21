@@ -15,10 +15,11 @@
  */
 package jaeger.test.config;
 
-import jaeger.controller.DocumentController;
+import com.google.common.collect.Sets;
+import jaeger.controller.DataController;
 import jaeger.model.User;
-import jaeger.security.AccessAuthority;
 import jaeger.security.IdentityHelper;
+import jaeger.security.PermissionAuthority;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,24 +35,24 @@ import static org.mockito.Matchers.any;
 public class TestControllerConfiguration {
 
     @Bean
-    public DocumentController documentController() {
-        return new DocumentController();
+    public DataController documentController() {
+        return new DataController();
     }
 
     @Bean
     public IdentityHelper identityHelper() {
-        AccessAuthority accessAuthority = Mockito.mock(AccessAuthority.class);
+        PermissionAuthority accessAuthority = Mockito.mock(PermissionAuthority.class);
         User testUser = Mockito.mock(User.class);
         IdentityHelper helper = Mockito.mock(IdentityHelper.class);
 
-        Mockito.doReturn(true)
-               .when(accessAuthority).hasGroup(any(Set.class));
+        Mockito.doReturn(Sets.newHashSet("FOO"))
+               .when(accessAuthority).searchableNamespaces();
 
         Mockito.doReturn(testUser)
                .when(helper).getPrincipal();
 
         Mockito.doReturn(accessAuthority)
-               .when(testUser).getAccessAuthority();
+               .when(testUser).getPermissionAuthority();
 
         return helper;
     }
